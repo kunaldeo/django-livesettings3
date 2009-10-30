@@ -78,6 +78,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sitemaps',
     'livesettings',
+    'keyedcache',
     #'debug_toolbar',
     'tests.localsite',
     'django_extensions'
