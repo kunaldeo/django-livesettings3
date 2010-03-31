@@ -1,8 +1,8 @@
 from django import template
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
-from livesettings import config_value, SettingNotSet
-from satchmo_utils import url_join
+from livesettings import config_value
+from livesettings.utils import url_join
 import logging
 
 log = logging.getLogger('configuration.config_tags')
@@ -15,23 +15,23 @@ def force_space(value, chars=40):
     chars = int(chars)
     if len(value) < chars:
         return value
-    else:    
+    else:
         out = []
         start = 0
         end = 0
         looping = True
-        
+
         while looping:
             start = end
             end += chars
             out.append(value[start:end])
             looping = end < len(value)
-    
+
     return ' '.join(out)
 
 def break_at(value,  chars=40):
     """Force spaces into long lines which don't have spaces"""
-    
+
     chars = int(chars)
     value = unicode(value)
     if len(value) < chars:
@@ -44,7 +44,7 @@ def break_at(value,  chars=40):
                 out.append(force_space(word, chars))
             else:
                 out.append(word)
-                
+
     return " ".join(out)
 
 register.filter('break_at', break_at)
@@ -77,13 +77,13 @@ def admin_site_views(view):
         paths = ["http://", site.domain]
         if path:
             paths.append(path)
-            
+
         links.append((site.name, url_join(paths)))
-    
+
     ret = {
         'links' : links,
     }
     return ret
-    
+
 
 register.inclusion_tag('livesettings/_admin_site_views.html')(admin_site_views)

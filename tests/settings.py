@@ -79,9 +79,7 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
     'livesettings',
     'keyedcache',
-    #'debug_toolbar',
     'tests.localsite',
-    'django_extensions'
 )
 
 AUTHENTICATION_BACKENDS = (
