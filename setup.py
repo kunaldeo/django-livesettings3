@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = (1, 4, 1)
+VERSION = (1, 4, 2)
 
 # Dynamically calculate the version based on VERSION tuple
 if len(VERSION)>2 and VERSION[2] is not None:
@@ -28,5 +28,6 @@ setup(
                    'Programming Language :: Python',
                    'Framework :: Django'],
     packages = find_packages(),
+    setup_requires=["setuptools_hg"],
     include_package_data = True,
 )
