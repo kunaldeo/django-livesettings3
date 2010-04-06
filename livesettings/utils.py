@@ -1,5 +1,6 @@
 import sys
 import types
+import os
 
 def can_loop_over(maybe):
     """Test value to see if it is list like"""
@@ -47,3 +48,40 @@ def load_module(module):
         __import__(module)
         module = sys.modules[module]
     return module
+
+def get_flat_list(sequence):
+    """flatten out a list and return the flat list"""
+    flat = []
+    flatten_list(sequence, result=flat)
+    return flat
+    
+def url_join(*args):
+    """Join any arbitrary strings into a forward-slash delimited string.
+    Do not strip leading / from first element, nor trailing / from last element.
+
+    This function can take lists as arguments, flattening them appropriately.
+
+    example:
+    url_join('one','two',['three','four'],'five') => 'one/two/three/four/five'
+    """
+    if len(args) == 0:
+        return ""
+
+    args = get_flat_list(args)
+
+    if len(args) == 1:
+        return str(args[0])
+
+    else:
+        args = [str(arg).replace("\\", "/") for arg in args]
+
+        work = [args[0]]
+        for arg in args[1:]:
+            if arg.startswith("/"):
+                work.append(arg[1:])
+            else:
+                work.append(arg)
+
+        joined = reduce(os.path.join, work)
+
+    return joined.replace("\\", "/")
