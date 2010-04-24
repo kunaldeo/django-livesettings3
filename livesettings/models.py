@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.db import transaction
 from django.db.models import loading
 from django.utils.translation import ugettext_lazy as _
 from keyedcache import cache_key, cache_get, cache_set, NotCachedError
@@ -17,18 +16,12 @@ def _safe_get_siteid(site):
     if not site:
         try:
             site = Site.objects.get_current()
-        except:
-            transaction.rollback()
-        if site and site.id:
             siteid = site.id
-        else:
+        except:
             siteid = settings.SITE_ID
     else:
         siteid = site.id
-    transaction.commit()
     return siteid
-
-_safe_get_siteid=transaction.commit_manually(_safe_get_siteid)
 
 def find_setting(group, key, site=None):
     """Get a setting or longsetting by group and key, cache and return it."""

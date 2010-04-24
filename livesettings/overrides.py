@@ -4,7 +4,6 @@ for settings retrieval.
 
 from django.conf import settings as djangosettings
 from django.contrib.sites.models import Site
-from django.db import transaction
 import logging
 
 __all__ = ['get_overrides']
@@ -13,18 +12,12 @@ def _safe_get_siteid(site):
     if not site:
         try:
             site = Site.objects.get_current()
-        except:
-            transaction.rollback()
-        if site and site.id:
             siteid = site.id
-        else:
+        except:
             siteid = djangosettings.SITE_ID
     else:
         siteid = site.id
-    transaction.commit()
     return siteid
-
-_safe_get_siteid=transaction.commit_manually(_safe_get_siteid)
 
 def get_overrides(siteid=-1):
     """Check to see if livesettings is allowed to use the database.  If not, then
