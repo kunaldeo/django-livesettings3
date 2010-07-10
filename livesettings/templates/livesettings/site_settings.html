@@ -5,7 +5,7 @@
 {% block extrahead %}
 <script type="text/javascript" src="{% url admin:jsi18n %}"></script>
 <script type="text/javascript" src="{% admin_media_prefix %}js/core.js"></script>
-<script type="text/javascript" src="{% admin_media_prefix %}js/admin/CollapsedFieldsets.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/admin/collapse.min.js"></script>
 {% endblock %}
 {% block extrastyle %}
 {{ block.super }}
@@ -54,7 +54,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	<form method="post">
 		{% for field in form %}
 			{% if field.is_hidden %}
-				{{ field }}
+				<tr style="display: none;"><td>{{ field }}</td></tr>
 			{% else %}
 				{% ifchanged field.field.group %}{% with field.field.group as group %}
 				{% if not forloop.first %}
