@@ -23,8 +23,8 @@ div.fieldcontainer { float: left; margin-right: 0; }
 {% block userlinks %}<a href="/admin/doc/">{% trans 'Documentation' %}</a> / <a href="/admin/password_change/">{% trans 'Change password' %}</a> / <a href="/admin/logout/">{% trans 'Log out' %}</a>{% endblock %}
 {% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
-     <a href="/admin/">{% trans "Home" %}</a> &rsaquo;
-     {% trans "Edit Site Settings" %}
+	<a href="/admin/">{% trans "Home" %}</a> &rsaquo;
+	{% trans "Edit Site Settings" %}
 </div>
 {% endif %}{% endblock %}
 {% block content %}
@@ -32,7 +32,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
 <div class="fieldcontainer">
 <ul class="fieldref">
 {% for group in form.groups %}
-    <li><a onclick="javascript:CollapsedFieldsets.show({{ forloop.counter0 }});" href="#{{ group.key }}">{{ group.name }}</a></li>
+	<li><a onclick="javascript:CollapsedFieldsets.show({{ forloop.counter0 }});" href="#{{ group.key }}">{{ group.name }}</a></li>
 {% endfor %}
 </ul>
 </div>
@@ -46,46 +46,46 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	{% admin_site_views 'satchmo_site_settings' %}
 {% else %}
 	{% if form.errors %}
-	    <p class="errornote">
-	    {% blocktrans count form.errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
-	    </p>
+		<p class="errornote">
+		{% blocktrans count form.errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
+		</p>
 	{% endif %}
 	{% if form.fields %}
 	<form method="post">
-	    {% for field in form %}
-	        {% if field.is_hidden %}
-	            {{ field }}
-	        {% else %}
-	            {% ifchanged field.field.group %}{% with field.field.group as group %}
-	            {% if not forloop.first %}
-	            </table>
-	            </fieldset>
-	            {% endif %}
-	            <fieldset class="module collapse">
-	            <h2 id="{{ group.key }}">{{ group.name }}</h2>
-	                <table summary="{% blocktrans with group.name as name %}Group settings: {{ name }}{% endblocktrans %}" style="width: 100%">
-	            {% endwith %}{% endifchanged %}
+		{% for field in form %}
+			{% if field.is_hidden %}
+				{{ field }}
+			{% else %}
+				{% ifchanged field.field.group %}{% with field.field.group as group %}
+				{% if not forloop.first %}
+				</table>
+				</fieldset>
+				{% endif %}
+				<fieldset class="module collapse">
+				<h2 id="{{ group.key }}">{{ group.name }}</h2>
+					<table summary="{% blocktrans with group.name as name %}Group settings: {{ name }}{% endblocktrans %}" style="width: 100%">
+				{% endwith %}{% endifchanged %}
 
-	            	    {% if field.errors %}
-	            		<tr class="error">
-	            			<td colspan="2">{{ field.errors }}</td>
-	        		    </tr>
-	    		        {% endif %}
-	        			<tr{% if field.errors %} class="error"{% endif %}>
-	    				    <td style="width: 50%;">
-	        					{{ field.label_tag }}
-	        					{% if field.help_text %}
-	        						<p class="help">{{ field.help_text|break_at:40|safe }}</p>
-	        					{% endif %}
-	        					{% if field.field.default_text %}
-	        					    <p class="help">{{ field.field.default_text|break_at:40}}</p>
-	        					{% endif %}
-	        				</td>
-	        				<td>{{ field }}</td>
-	        			</tr>
-	    	{% endif %}
-	    {% endfor %}
-	    	</table>
+						{% if field.errors %}
+						<tr class="error">
+							<td colspan="2">{{ field.errors }}</td>
+						</tr>
+						{% endif %}
+						<tr{% if field.errors %} class="error"{% endif %}>
+							<td style="width: 50%;">
+								{{ field.label_tag }}
+								{% if field.help_text %}
+									<p class="help">{{ field.help_text|break_at:40|safe }}</p>
+								{% endif %}
+								{% if field.field.default_text %}
+									<p class="help">{{ field.field.default_text|break_at:40}}</p>
+								{% endif %}
+							</td>
+							<td>{{ field }}</td>
+						</tr>
+			{% endif %}
+		{% endfor %}
+			</table>
 		</div>
 	{% admin_site_views 'satchmo_site_settings' %}
 	<br class="clear:both;" />
@@ -94,7 +94,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	<p><a href="{% url settings_export %}">Export</a></p>
 	</form>
 	{% else %}
-	    <p>{% trans "You don't have permission to edit values." %}</p>
+		<p>{% trans "You don't have permission to edit values." %}</p>
 	{% endif %}
 {% endif %}
 </div>
