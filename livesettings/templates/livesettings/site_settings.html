@@ -58,7 +58,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
 			{% else %}
 				{% ifchanged field.field.group %}{% with field.field.group as group %}
 				{% if not forloop.first %}
-				</table>
+					</table>
 				</fieldset>
 				{% endif %}
 				<fieldset class="module collapse">
@@ -85,7 +85,8 @@ div.fieldcontainer { float: left; margin-right: 0; }
 						</tr>
 			{% endif %}
 		{% endfor %}
-			</table>
+					</table>
+				</fieldset>
 	{% admin_site_views 'satchmo_site_settings' %}
 	<br class="clear:both;" />
 	<input type="submit" value="Save" class="default" />
