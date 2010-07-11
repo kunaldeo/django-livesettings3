@@ -5,7 +5,9 @@
 {% block extrahead %}
 <script type="text/javascript" src="{% url admin:jsi18n %}"></script>
 <script type="text/javascript" src="{% admin_media_prefix %}js/core.js"></script>
-<script type="text/javascript" src="{% admin_media_prefix %}js/admin/collapse.min.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/collapse.js"></script>
 {% endblock %}
 {% block extrastyle %}
 {{ block.super }}
@@ -28,15 +30,6 @@ div.fieldcontainer { float: left; margin-right: 0; }
 </div>
 {% endif %}{% endblock %}
 {% block content %}
-{% comment %}
-<div class="fieldcontainer">
-<ul class="fieldref">
-{% for group in form.groups %}
-	<li><a onclick="javascript:CollapsedFieldsets.show({{ forloop.counter0 }});" href="#{{ group.key }}">{{ group.name }}</a></li>
-{% endfor %}
-</ul>
-</div>
-{% endcomment %}
 <span style="clear: both;"></span>
 <div id="content-main">
 {% if not use_db %}
@@ -90,7 +83,10 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	{% admin_site_views 'satchmo_site_settings' %}
 	<br class="clear:both;" />
 	<input type="submit" value="Save" class="default" />
+{% comment %}
+	<!-- As of django 1.2, it is not possible to implement this. -->
 	<p><a onclick="javascript:CollapsedFieldsets.uncollapse_all(); return false;" href="#">{% trans 'Uncollapse all' %}</a></p>
+{% endcomment %}
 	<p><a href="{% url settings_export %}">Export</a></p>
 	</form>
 	{% else %}
