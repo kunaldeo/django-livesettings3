@@ -83,10 +83,26 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	{% admin_site_views 'satchmo_site_settings' %}
 	<br class="clear:both;" />
 	<input type="submit" value="Save" class="default" />
-{% comment %}
+
+	<script type="text/javascript">
+/* See http://gist.github.com/471483 */
+django.jQuery(document).ready(function($) {
+	var e = $("fieldset.collapse a.collapse-toggle");
+	var fn = $.data(e[0]).events['click'][0].handler;
+	var filter = function() {
+		return ($.data(this, "lastToggle"+fn.guid) || 0) % 2;
+	};
+	var handler = function() { $(this).trigger('click'); }
+
+	uncollapse_all = function() {
+		e.filter(filter).each(handler);
+		return false;
+	};
+});
+	</script>
 	<!-- As of django 1.2, it is not possible to implement this. -->
-	<p><a onclick="javascript:CollapsedFieldsets.uncollapse_all(); return false;" href="#">{% trans 'Uncollapse all' %}</a></p>
-{% endcomment %}
+	<p><a onclick="javascript:return uncollapse_all();" href="#">{% trans 'Uncollapse all' %}</a></p>
+
 	<p><a href="{% url settings_export %}">Export</a></p>
 	</form>
 	{% else %}
