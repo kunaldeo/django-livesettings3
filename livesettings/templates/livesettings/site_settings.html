@@ -2,10 +2,35 @@
 {% load i18n admin_modify config_tags %}
 
 {% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/forms.css{% endblock %}
-{% block extrahead %}
+{% block extrahead %}{{ block.super }}
 <script type="text/javascript" src="{% url admin:jsi18n %}"></script>
 <script type="text/javascript" src="{% admin_media_prefix %}js/core.js"></script>
+{% if DJANGO_PRE_12 %}
 <script type="text/javascript" src="{% admin_media_prefix %}js/admin/CollapsedFieldsets.js"></script>
+<script type="text/javascript">
+var uncollapse = function () {
+    CollapsedFieldsets.uncollapse_all();
+    return false;
+}
+</script>
+{% else %}
+<script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/collapse.js"></script>
+<script type="text/javascript">
+var $ = django.jQuery,
+uncollapse = function() {
+           $("fieldset.collapse a.collapse-toggle").each(function() {
+               var elt = $(this);
+               if (elt.text() == gettext('Show')) {
+                   elt.click();
+               }
+           });
+           $('fieldset').removeClass('collapsed');
+           return false
+};
+</script>
+{% endif %}
+
 {% endblock %}
 {% block extrastyle %}
 {{ block.super }}
@@ -51,7 +76,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	    </p>
 	{% endif %}
 	{% if form.fields %}
-	<form method="post">
+	<form method="post" id="settingsform">
 	    {% for field in form %}
 	        {% if field.is_hidden %}
 	            {{ field }}
@@ -89,8 +114,8 @@ div.fieldcontainer { float: left; margin-right: 0; }
 		</div>
 	{% admin_site_views 'satchmo_site_settings' %}
 	<br class="clear:both;" />
-	<input type="submit" value="Save" class="default" />
-	<p><a onclick="javascript:CollapsedFieldsets.uncollapse_all(); return false;" href="#">{% trans 'Uncollapse all' %}</a></p>
+	<input type="button" value="Update Settings" class="default" onclick="javascript:uncollapse();$('#settingsform').submit();"  />
+	<p><a onclick="javascript:return uncollapse();" href="#">{% trans 'Uncollapse all' %}</a></p>
 	<p><a href="{% url settings_export %}">Export</a></p>
 	</form>
 	{% else %}

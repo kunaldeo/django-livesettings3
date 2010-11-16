@@ -5,15 +5,20 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from livesettings import ConfigurationSettings, forms
 from livesettings.overrides import get_overrides
+import django
 import logging
 
-log = logging.getLogger('configuration.views')
+log = logging.getLogger('livesettings.views')
+
+def _pre_12():
+    ver = django.VERSION
+    return ver[0] == 1 and ver[1] < 2
 
 def group_settings(request, group, template='livesettings/group_settings.html'):
     # Determine what set of settings this editor is used for
-    
+
     use_db, overrides = get_overrides();
-    
+
     mgr = ConfigurationSettings()
     if group is None:
         settings = mgr
@@ -48,12 +53,13 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
             form = forms.SettingsEditor(settings=settings)
     else:
         form = None
-        
+
     return render_to_response(template, {
         'title': title,
         'group' : group,
         'form': form,
-        'use_db' : use_db
+        'use_db' : use_db,
+        'DJANGO_PRE_12' : _pre_12()
     }, context_instance=RequestContext(request))
 group_settings = never_cache(staff_member_required(group_settings))
 
@@ -61,31 +67,31 @@ group_settings = never_cache(staff_member_required(group_settings))
 # staff_member_required is implied, since it calls group_settings
 def site_settings(request):
     return group_settings(request, group=None, template='livesettings/site_settings.html')
-    
+
 def export_as_python(request):
     """Export site settings as a dictionary of dictionaries"""
-    
+
     from livesettings.models import Setting, LongSetting
     import pprint
-    
+
     work = {}
     both = list(Setting.objects.all())
     both.extend(list(LongSetting.objects.all()))
-    
+
     for s in both:
         if not work.has_key(s.site.id):
             work[s.site.id] = {}
         sitesettings = work[s.site.id]
-                    
+
         if not sitesettings.has_key(s.group):
             sitesettings[s.group] = {}
         sitegroup = sitesettings[s.group]
-        
+
         sitegroup[s.key] = s.value
-        
+
     pp = pprint.PrettyPrinter(indent=4)
     pretty = pp.pformat(work)
 
     return render_to_response('livesettings/text.txt', { 'text' : pretty }, mimetype='text/plain')
-    
+
 export_as_python = never_cache(staff_member_required(export_as_python))
