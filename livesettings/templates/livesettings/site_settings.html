@@ -104,7 +104,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
         </div>
 	{% admin_site_views 'satchmo_site_settings' %}
 	<br class="clear:both;" />
-	<input type="button" value="Update Settings" class="default" onclick="javascript:uncollapse();$('#settingsform').submit();"  />
+	<input type="submit" value="{% trans 'Update Settings' %}" />
 	<p><a onclick="javascript:return uncollapse();" href="#">{% trans 'Uncollapse all' %}</a></p>
 	<p><a href="{% url settings_export %}">Export</a></p>
 	</form>
