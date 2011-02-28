@@ -18,7 +18,7 @@ import signals
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
       'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
-      'StringValue', 'LongStringValue', 'MultipleStringValue']
+      'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue']
 
 _WARN = {}
 
@@ -561,7 +561,6 @@ class LongStringValue(Value):
 
     to_editor = to_python
 
-
 class MultipleStringValue(Value):
 
     class field(forms.CharField):
@@ -596,6 +595,11 @@ class MultipleStringValue(Value):
 
 
     to_editor = to_python
+
+class LongMultipleStringValue(MultipleStringValue):
+    def make_setting(self, db_value):
+        log.debug('new long setting %s.%s', self.group.key, self.key)
+        return LongSetting(group=self.group.key, key=self.key, value=db_value)
 
 class ModuleValue(Value):
     """Handles setting modules, storing them as strings in the db."""
