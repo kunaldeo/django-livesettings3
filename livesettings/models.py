@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.db import models
+from django.db import models, connection, DatabaseError
 from django.db.models import loading
 from django.utils.translation import ugettext_lazy as _
 from keyedcache import cache_key, cache_get, cache_set, NotCachedError
@@ -12,13 +12,30 @@ log = logging.getLogger('configuration.models')
 
 __all__ = ['SettingNotSet', 'Setting', 'LongSetting', 'find_setting']
 
+try:
+    is_site_initializing
+except:
+    is_site_initializing = True  # until the first success find "django_site" table, by any thread
+    is_first_warn = True
+
 def _safe_get_siteid(site):
+    global is_site_initializing, is_first_warn
     if not site:
         try:
             site = Site.objects.get_current()
             siteid = site.id
-        except:
+        except Exception, e:
+            if is_site_initializing and isinstance(e, DatabaseError) and str(e).find('django_site') > -1:
+                if is_first_warn:
+                    log.warn(str(e).strip())
+                    is_first_warn = False
+                log.warn('Can not get siteid; probably before syncdb; ROLLBACK')
+                connection._rollback()
+            else:
+                is_site_initializing = False
             siteid = settings.SITE_ID
+        else:
+            is_site_initializing = False
     else:
         siteid = site.id
     return siteid

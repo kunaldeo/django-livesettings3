@@ -5,6 +5,7 @@ http://code.google.com/p/django-values/
 from decimal import Decimal
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
+from django.db import connection, DatabaseError
 from django.utils import simplejson
 from django.utils.datastructures import SortedDict
 from django.utils.encoding import smart_str
@@ -21,6 +22,11 @@ __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'Decimal
       'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue']
 
 _WARN = {}
+try:
+    is_setting_initializing
+except:
+    is_setting_initializing = True  # until the first success find "livesettings_setting" table, by any thread
+
 
 log = logging.getLogger('configuration')
 
@@ -262,6 +268,7 @@ class Value(object):
     setting = property(fget = _setting)
 
     def _value(self):
+        global is_setting_initializing
         use_db, overrides = get_overrides()
 
         if not use_db:
@@ -278,6 +285,7 @@ class Value(object):
                 val = self.setting.value
 
             except SettingNotSet, sns:
+                is_setting_initializing = False
                 if self.use_default:
                     val = self.default
                     if overrides:
@@ -289,27 +297,32 @@ class Value(object):
                     val = NOTSET
 
             except AttributeError, ae:
+                is_setting_initializing = False
                 log.error("Attribute error: %s", ae)
                 log.error("%s: Could not get _value of %s", self.key, self.setting)
                 raise(ae)
 
             except Exception, e:
                 global _WARN
-                log.error(e)
-                if str(e).find("configuration_setting") > -1:
-                    if not _WARN.has_key('configuration_setting'):
-                        log.warn('Error loading setting %s.%s from table, OK if you are in syncdb', self.group.key, self.key)
-                        _WARN['configuration_setting'] = True
+                if is_setting_initializing and isinstance(e, DatabaseError) and str(e).find("livesettings_setting") > -1:
+                    if not _WARN.has_key('livesettings_setting'):
+                        log.warn(str(e).strip())
+                        _WARN['livesettings_setting'] = True
+                    log.warn('Error loading livesettings from table, OK if you are in syncdb or before it. ROLLBACK')
+                    connection._rollback()
 
                     if self.use_default:
                         val = self.default
                     else:
                         raise ImproperlyConfigured("All settings used in startup must have defaults, %s.%s does not", self.group.key, self.key)
                 else:
+                    is_setting_initializing = False
                     import traceback
                     traceback.print_exc()
-                    log.warn("Problem finding settings %s.%s, %s", self.group.key, self.key, e)
+                    log.error("Problem finding settings %s.%s, %s", self.group.key, self.key, e)
                     raise SettingNotSet("Startup error, couldn't load %s.%s" %(self.group.key, self.key))
+            else:
+                is_setting_initializing = False
         return val
 
     def update(self, value):
