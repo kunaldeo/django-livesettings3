@@ -417,9 +417,15 @@ class BooleanValue(Value):
 class DecimalValue(Value):
     class field(forms.DecimalField):
 
-           def __init__(self, *args, **kwargs):
-               kwargs['required'] = False
-               forms.DecimalField.__init__(self, *args, **kwargs)
+            def __init__(self, *args, **kwargs):
+                kwargs['required'] = False
+                forms.DecimalField.__init__(self, *args, **kwargs)
+               
+            def clean(self, value):
+                try:
+                    return Decimal(value)
+                except:
+                    raise forms.ValidationError('This value must be a decimal number.')
 
     def to_python(self, value):
         if value==NOTSET:
