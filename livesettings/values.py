@@ -2,7 +2,7 @@
 
 http://code.google.com/p/django-values/
 """
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, DatabaseError
