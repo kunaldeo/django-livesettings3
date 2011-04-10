@@ -543,7 +543,7 @@ class PercentValue(Value):
     def to_python(self, value):
         if value == NOTSET:
             value = 0
-        return unicode(value)
+        return Decimal(value)
 
     def to_editor(self, value):
         if value == NOTSET:
