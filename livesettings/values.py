@@ -2,13 +2,14 @@
 
 http://code.google.com/p/django-values/
 """
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, DatabaseError
 from django.utils import simplejson
 from django.utils.datastructures import SortedDict
 from django.utils.encoding import smart_str
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext, ugettext_lazy as _
 from livesettings.models import find_setting, LongSetting, Setting, SettingNotSet
 from livesettings.overrides import get_overrides
@@ -422,8 +423,9 @@ class DecimalValue(Value):
                 forms.DecimalField.__init__(self, *args, **kwargs)
                
             def clean(self, value):
+                value = super(forms.DecimalField, self).clean(value)
                 try:
-                    return Decimal(value)
+                    return unicode(Decimal(value))
                 except:
                     raise forms.ValidationError('This value must be a decimal number.')
 
@@ -520,17 +522,28 @@ class PercentValue(Value):
             kwargs['required'] = False
             forms.DecimalField.__init__(self, 100, 0, 5, 2, *args, **kwargs)
 
+        def clean(self, value):
+            value = super(forms.DecimalField, self).clean(value)
+            try:
+                value = Decimal(value)
+            except:
+                raise forms.ValidationError('This value must be a decimal number.')
+            return unicode(Decimal(value)/100)
+        
         class widget(forms.TextInput):
-            def render(self, *args, **kwargs):
+            def render(self, name, value, attrs=None):
                 # Place a percent sign after a smaller text field
-                attrs = kwargs.pop('attrs', {})
+                try:
+                    value = unicode("%.2f" % (Decimal(value)*100))
+                except:
+                    value = "N/A"
                 attrs['size'] = attrs['max_length'] = 6
-                return forms.TextInput.render(self, attrs=attrs, *args, **kwargs) + '%'
+                return mark_safe(super(forms.TextInput, self).render(name, value, attrs) + '%')
 
     def to_python(self, value):
         if value == NOTSET:
             value = 0
-        return Decimal(value) / 100
+        return unicode(value)
 
     def to_editor(self, value):
         if value == NOTSET:
