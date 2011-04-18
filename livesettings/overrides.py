@@ -28,8 +28,8 @@ def get_overrides(siteid=-1):
 
     LIVESETTINGS_OPTIONS = {
             1 : {
-                    'DB' : [True/False],
-                    SETTINGS = {
+                    'DB' : False,  # or True
+                    'SETTINGS' : {
                         'GROUPKEY' : {'KEY', val, 'KEY2', val},
                         'GROUPKEY2' : {'KEY', val, 'KEY2', val},
                     }
@@ -38,7 +38,8 @@ def get_overrides(siteid=-1):
 
     In the settings dict above, the "val" entries must exactly match the format 
     stored in the database for a setting.  Do not use a literal True or an integer,
-    it needs to be the string representation of them.
+    it needs to be the string representation of them. The easiest way to get
+    a right formated expression is by the URL http://your.site/settings/export/
 
     Returns a tuple (DB_ALLOWED, SETTINGS)
     """

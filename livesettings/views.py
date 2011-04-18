@@ -79,14 +79,8 @@ def export_as_python(request):
     both.extend(list(LongSetting.objects.all()))
 
     for s in both:
-        if not work.has_key(s.site.id):
-            work[s.site.id] = {}
-        sitesettings = work[s.site.id]
-
-        if not sitesettings.has_key(s.group):
-            sitesettings[s.group] = {}
-        sitegroup = sitesettings[s.group]
-
+        sitesettings = work.setdefault(s.site.id, {'DB': False, 'SETTINGS':{}})['SETTINGS']
+        sitegroup = sitesettings.setdefault(s.group, {})
         sitegroup[s.key] = s.value
 
     pp = pprint.PrettyPrinter(indent=4)

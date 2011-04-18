@@ -1,1 +1,2 @@
+LIVESETTINGS_OPTIONS = \
 {{ text|safe }}
