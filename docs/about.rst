@@ -19,6 +19,7 @@ Livesettings supports several types of input choices:
     * Multiple strings
     * Long multiple strings
     * Module values
+    * Password
 
 Livesettings has been used for many years in the satchmo project and is considered stable and production ready.
 

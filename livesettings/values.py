@@ -20,7 +20,7 @@ import signals
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
       'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
-      'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue']
+      'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue', 'PasswordValue']
 
 _WARN = {}
 try:
@@ -573,6 +573,38 @@ class StringValue(Value):
         return unicode(value)
 
     to_editor = to_python
+
+class PasswordValue(StringValue):
+    """
+    Configuration value of the type Password
+    Usage:
+        config_register(PasswordValue(group, key, description=None, help_text,... render_value=False))
+
+        render_value    Determines whether the widget will have a value filled in when the form is re-displayed (default is False).
+                        If render_value=False, a password can be also completely deleted by writing space to the field.
+    """
+    class field(forms.CharField):
+        render_value = False
+        def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
+            kwargs['widget'] = forms.PasswordInput(render_value=self.render_value)
+            forms.CharField.__init__(self, *args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
+        # prevent modifiyng of update_callback
+        save_update_callback = self.update_callback
+        self.field.render_value = kwargs.pop('render_value', False)
+        super(PasswordValue, self).__init__(*args, **kwargs)
+        self.update_callback = save_update_callback
+
+    def update_callback(self, current_value, new_value):
+        # An old password can be deleted only by one space.
+        if not self.field.render_value:
+            if new_value == '':
+                return current_value
+            elif new_value == ' ':
+                return ''
+        return new_value
 
 class LongStringValue(Value):
 
