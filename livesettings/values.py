@@ -578,9 +578,9 @@ class PasswordValue(StringValue):
     """
     Configuration value of the type Password
     Usage:
-        config_register(PasswordValue(group, key, description=None, help_text,... render_value=False))
+        config_register(PasswordValue(group, key, description=None, help_text,... render_value=True))
 
-        render_value    Determines whether the widget will have a value filled in when the form is re-displayed (default is False).
+        render_value    Determines whether the widget will have a value filled in when the form is re-displayed (default is True).
                         If render_value=False, a password can be also completely deleted by writing space to the field.
     """
     class field(forms.CharField):
@@ -593,7 +593,7 @@ class PasswordValue(StringValue):
     def __init__(self, *args, **kwargs):
         # prevent modifiyng of update_callback
         save_update_callback = self.update_callback
-        self.field.render_value = kwargs.pop('render_value', False)
+        self.field.render_value = kwargs.pop('render_value', True)
         super(PasswordValue, self).__init__(*args, **kwargs)
         self.update_callback = save_update_callback
 
