@@ -686,8 +686,14 @@ class ModuleValue(Value):
         if value == NOTSET:
             v = {}
         else:
-            v = load_module(value)
+            try:
+                v = load_module(value)
+            except ImportError:
+                v = ''
         return v
+
+    def get_db_prep_save(self, value):
+        return value.__name__
 
     def to_editor(self, value):
         if value == NOTSET:

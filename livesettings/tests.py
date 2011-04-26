@@ -1,4 +1,5 @@
 from django.conf import settings as djangosettings
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 import keyedcache
 from livesettings import *
@@ -125,11 +126,11 @@ class ConfigTestModuleValue(TestCase):
         self.g = g
         self.c = config_register(ModuleValue(g, 'test'))
 
-    # def testModule(self):
-    #     c = config_get('modules', 'test')
-    #     c.update('satchmo_store')
+    def testModule(self):
+        c = config_get('modules', 'test')
+        c.update('django')
 
-    #     self.assert_(hasattr(self.c.value, 'get_version'))
+        self.assert_(hasattr(self.c.value, 'get_version'))
 
 class ConfigTestSortOrder(TestCase):
     def setUp(self):
@@ -543,3 +544,39 @@ class OverrideTest(TestCase):
         self.assertEqual(v[0], "one")
         self.assertEqual(v[1], "two")
         self.assertEqual(v[2], "three")
+
+
+class PermissionTest(TestCase):
+    """Test access permissions"""
+    def setUp(self):
+        from django.contrib.auth.models import Permission, User
+        from django.contrib.contenttypes.models import ContentType
+
+        opts = Setting._meta
+        user1 = User.objects.create_user('warehouseman', 'john@example.com', 'secret')
+        user1.is_staff = True
+        user1.save()
+        user2 = User.objects.create_user('developer', 'fred@example.com', 'secret')
+        user2.is_staff = True
+        user2.user_permissions.add(Permission.objects.get(codename='change_setting', 
+                content_type=ContentType.objects.get(app_label='livesettings', model='setting'), codename='change_setting'))
+        user2.save()
+
+        keyedcache.cache_delete()
+        value = IntegerValue(BASE_GROUP, 'SingleItem')
+        config_register(value)
+
+    def testUnauthorized(self):
+        """Unauthorized or staff without enought additional permission"""
+        response = self.client.get('/settings/')
+        self.assertRedirects(response, '/accounts/login/?next=' + reverse('satchmo_site_settings'))
+        self.assertEqual(response.status_code, 302)
+        self.client.login(username='warehouseman', password='secret')
+        response = self.client.get('/settings/')
+        #self.assertRedirects(response.status_code)
+        self.assertEqual(response.status_code, 302)
+
+    def testAuthorizedEnough(self):
+        self.client.login(username='developer', password='secret')
+        response = self.client.get('/settings/')
+        self.assertContains(response, 'SingleItem')

@@ -3,14 +3,6 @@ import os.path
 import sys
 
 DIRNAME = os.path.dirname(__file__)
-# trick to get the two-levels up directory, which for the "simple" project should be the satchmo dir
-_parent = lambda x: os.path.normpath(os.path.join(x, '..'))
-
-SATCHMO_DIRNAME = _parent(_parent(DIRNAME))
-SATCHMO_APPS = os.path.join(SATCHMO_DIRNAME, 'apps')
-
-if not SATCHMO_APPS in sys.path:
-    sys.path.append(SATCHMO_APPS)
 
 if not DIRNAME in sys.path:
     sys.path.append(DIRNAME)

@@ -1,6 +1,8 @@
 Usage
 =====
 
+Very simple example project is in directory livesettings/test_app, almost identical with the following description.
+
 Creating Config.py
 ------------------
 
@@ -43,37 +45,6 @@ You can now see the results of your work by running the dev server and going to 
 
     python manage.py runserver
     
-Restricting Access to Livesettings
-----------------------------------
-
-In order to give non-superusers access to the settings, make sure to use the django user permission admin screen to give the desired user the *livesettings|setting|Can change settting*.
-
-.. Note::
-    Superusers will have access to this setting without enabling any specific permissions
-
-Permissions for insert, delete or permission for longsetting are ignored and only the above-mentioned permission is used.
-
-Exporting Settings
-------------------
-
-Settings can be exported by the `http://127.0.0.1:8000/settings/export/ <http://127.0.0.1:8000/settings/export/>`_ . After exporting the file, the entire
-output can be manually copied and pasted to :file:`settings.py`. If you restrict DB access to the settings, all of the livesettings_* tables
-will be unused. 
-
-Here is a simple example of what the extract will look like::
-
-    LIVESETTINGS_OPTIONS = \
-    {   1: {   'DB': False,
-               'SETTINGS': {   u'MyApp': {   u'DECIMAL_TEST': u'34.0923443',
-                                             u'MEASUREMENT_SYSTEM': u'["metric"]',
-                                             u'PERCENT_TEST': u'0.251'}}}}
-
-In order to restrict or enable DB access, use the following line in your settings::
-
-    'DB': True,    # or False
-
-If you have multiple sites, they can be manually combined in the file as well.
-
 Accessing your value in a view
 ------------------------------
 
@@ -99,6 +70,37 @@ Using the value in your :file:`index.html` is straightforward::
     <p>Test page</p>
     <p>You want to show {{image_count}} pictures and use the {{measurement_system}} system.</p>
 
+
+Restricting Access to Livesettings
+----------------------------------
+
+In order to give non-superusers access to the settings, make sure to use the django user permission admin screen to give the desired user the *livesettings|setting|Can change settting*.
+
+.. Note::
+    Superusers will have access to this setting without enabling any specific permissions
+
+Permissions for insert, delete or permission for longsetting are ignored and only the above-mentioned permission is used.
+
+Exporting Settings
+------------------
+
+Settings can be exported by the `http://127.0.0.1:8000/settings/export/ <http://127.0.0.1:8000/settings/export/>`_ . After exporting the file, the entire
+output can be manually copied and pasted to :file:`settings.py` in order to deploy configuration to more sites or to entirely prevent further changes.
+If you restrict DB access to the settings, all of the livesettings_* tables will be unused. 
+
+Here is a simple example of what the extract will look like::
+
+    LIVESETTINGS_OPTIONS = \
+    {   1: {   'DB': False,
+               'SETTINGS': {   u'MyApp': {   u'DECIMAL_TEST': u'34.0923443',
+                                             u'MEASUREMENT_SYSTEM': u'["metric"]',
+                                             u'PERCENT_TEST': u'0.251'}}}}
+
+In order to restrict or enable DB access, use the following line in your settings::
+
+    'DB': True,    # or False
+
+If you have multiple sites, they can be manually combined in the file as well.
 
 Next Steps
 ----------
