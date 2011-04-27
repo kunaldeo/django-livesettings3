@@ -1,7 +1,7 @@
 Usage
 =====
 
-Very simple example project is in directory livesettings/test_app, almost identical with the following description.
+A very simple example project is in the directory :file:`livesettings/test_app`. It is almost identical to the following description and is a useful example for integrating livesettings into your app.
 
 Creating Config.py
 ------------------
