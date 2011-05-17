@@ -1,8 +1,9 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.cache import never_cache
 from livesettings import ConfigurationSettings, forms
 from livesettings.overrides import get_overrides
@@ -15,6 +16,7 @@ def _pre_12():
     ver = django.VERSION
     return ver[0] == 1 and ver[1] < 2
 
+@csrf_protect
 def group_settings(request, group, template='livesettings/group_settings.html'):
     # Determine what set of settings this editor is used for
 
@@ -89,4 +91,6 @@ def export_as_python(request):
 
     return render_to_response('livesettings/text.txt', { 'text' : pretty }, mimetype='text/plain')
 
-export_as_python = never_cache(permission_required('livesettings.change_setting')(export_as_python))
+# Required permission `is_superuser` is equivalent to auth.change_user,
+# because who can modify users, can easy became a superuser.
+export_as_python = never_cache(permission_required('auth.change_user')(export_as_python))
