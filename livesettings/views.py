@@ -2,6 +2,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import permission_required
+from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from livesettings import ConfigurationSettings, forms
 from livesettings.overrides import get_overrides
@@ -44,7 +45,7 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
                     if cfg.update(value):
 
                         # Give user feedback as to which settings were changed
-                        request.user.message_set.create(message='Updated %s on %s' % (cfg.key, cfg.group.key))
+                        messages.add_message(request, messages.INFO, 'Updated %s on %s' % (cfg.key, cfg.group.key))
 
                 return HttpResponseRedirect(request.path)
         else:
