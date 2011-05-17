@@ -583,17 +583,21 @@ class PasswordValue(StringValue):
         render_value    Determines whether the widget will have a value filled in when the form is re-displayed (default is True).
                         If render_value=False, a password can be also completely deleted by writing space to the field.
     """
-    class field(forms.CharField):
-        render_value = False
+    # class field is dynamically assigned to the instance as FieldRender or FieldNoRender
+    class FieldRender(forms.CharField):
+        render_value = True
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             kwargs['widget'] = forms.PasswordInput(render_value=self.render_value)
             forms.CharField.__init__(self, *args, **kwargs)
 
+    class FieldNoRender(FieldRender):
+        render_value = False
+
     def __init__(self, *args, **kwargs):
         # prevent modifiyng of update_callback
         save_update_callback = self.update_callback
-        self.field.render_value = kwargs.pop('render_value', True)
+        setattr(self, 'field', kwargs.pop('render_value', True) and PasswordValue.FieldRender or PasswordValue.FieldNoRender)
         super(PasswordValue, self).__init__(*args, **kwargs)
         self.update_callback = save_update_callback
 
