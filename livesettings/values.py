@@ -389,7 +389,7 @@ class Value(object):
     def to_editor(self, value):
         "Returns a value suitable for display in a form widget"
         if value == NOTSET:
-            return NOTSET
+            return NOTSET  # TODO this was not a good idea for an editor: "<object object 0x123..>"
         return unicode(value)
 
 ###############
@@ -424,13 +424,15 @@ class DecimalValue(Value):
                
             def clean(self, value):
                 value = super(forms.DecimalField, self).clean(value)
+                if value == None:
+                    return Decimal("0")
                 try:
                     return unicode(Decimal(value))
                 except:
                     raise forms.ValidationError('This value must be a decimal number.')
 
     def to_python(self, value):
-        if value==NOTSET:
+        if value == NOTSET:
             return Decimal("0")
 
         try:
@@ -450,7 +452,14 @@ class DecimalValue(Value):
 class DurationValue(Value):
 
     class field(forms.CharField):
+
+        def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
+            forms.CharField.__init__(self, *args, **kwargs)
+
         def clean(self, value):
+            if value == '':
+                value = 0
             try:
                 return datetime.timedelta(seconds=float(value))
             except (ValueError, TypeError):
@@ -485,7 +494,7 @@ class FloatValue(Value):
             forms.FloatField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
-        if value == NOTSET:
+        if value in (NOTSET, None) :
             value = 0
         return float(value)
 
@@ -503,7 +512,7 @@ class IntegerValue(Value):
             forms.IntegerField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
-        if value == NOTSET:
+        if value in (NOTSET, None):
             value = 0
         return int(value)
 
@@ -523,6 +532,8 @@ class PercentValue(Value):
             forms.DecimalField.__init__(self, 100, 0, 5, 2, *args, **kwargs)
 
         def clean(self, value):
+            if value == '':
+                value = 0
             value = super(forms.DecimalField, self).clean(value)
             try:
                 value = Decimal(value)
@@ -556,6 +567,7 @@ class PositiveIntegerValue(IntegerValue):
     class field(forms.IntegerField):
 
         def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
             kwargs['min_value'] = 0
             forms.IntegerField.__init__(self, *args, **kwargs)
 
@@ -687,8 +699,8 @@ class ModuleValue(Value):
             return load_module("%s.%s" % (value, module))
 
     def to_python(self, value):
-        if value == NOTSET:
-            v = {}
+        if value in (NOTSET, ''):
+            v = {}    # TODO this was probably not a good idea
         else:
             try:
                 v = load_module(value)
@@ -697,7 +709,7 @@ class ModuleValue(Value):
         return v
 
     def get_db_prep_save(self, value):
-        return value.__name__
+        return getattr(value, '__name__', '')
 
     def to_editor(self, value):
         if value == NOTSET:
