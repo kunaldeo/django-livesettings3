@@ -129,7 +129,7 @@ class Value(object):
             - `requires` - If given as a `Value`, then this field will only be rendered if that Value evaluates true (for Boolean requires) or the proper key is in the associated value.
             - `requiresvalue` - If set, then this field will only be rendered if that value is in the list returned by self.value. Defaults to self.key.
             - `hidden` - If true, then render a hidden field.
-            - `default` - If given, then this Value will return that default whenever it has no assocated `Setting`.
+            - `default` - If given, then this Value will return that default whenever it has no associated `Setting`.
             - `update_callback` - if given, then this value will call the callback whenever updated
         """
         self.group = group

@@ -94,4 +94,8 @@ DEBUG_TOOLBAR_CONFIG = {
 
 CACHE_PREFIX = 'T'
 CACHE_TIMEOUT = 300
+# If you use logging with the level DEBUG in your application, prevent increasing
+# of logging level of keyedcache by uncommenting the following:
+#import logging
+#logging.getLogger('keyedcache').setLevel(logging.INFO)
 DEBUG = True

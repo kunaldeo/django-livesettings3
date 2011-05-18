@@ -484,7 +484,7 @@ class LongSettingTest(TestCase):
 
         try:
             q = LongSetting.objects.get(pk = remember)
-            self.fail("Should be deletec")
+            self.fail("Should be deleted")
         except LongSetting.DoesNotExist:
             pass
 
