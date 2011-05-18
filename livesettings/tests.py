@@ -2,6 +2,7 @@ from django.conf import settings as djangosettings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 import keyedcache
+import livesettings
 from livesettings import *
 import logging
 log = logging.getLogger('test');
@@ -548,35 +549,195 @@ class OverrideTest(TestCase):
 
 class PermissionTest(TestCase):
     """Test access permissions"""
+    urls = 'livesettings.test_urls'
+
     def setUp(self):
         from django.contrib.auth.models import Permission, User
         from django.contrib.contenttypes.models import ContentType
 
-        opts = Setting._meta
+        # Users with different permissions
+        # staff member
         user1 = User.objects.create_user('warehouseman', 'john@example.com', 'secret')
         user1.is_staff = True
         user1.save()
-        user2 = User.objects.create_user('developer', 'fred@example.com', 'secret')
+        # developper with limited permissions
+        user2 = User.objects.create_user('cautious_developer', 'fred@example.com', 'secret')
         user2.is_staff = True
-        user2.user_permissions.add(Permission.objects.get(codename='change_setting', 
-                content_type=ContentType.objects.get(app_label='livesettings', model='setting'), codename='change_setting'))
+        user2.user_permissions.add(Permission.objects.get(codename='change_setting', \
+                content_type=ContentType.objects.get(app_label='livesettings', model='setting')))
         user2.save()
+        # superuser
+        user3 = User.objects.create_user('superuser', 'paul@example.com', 'secret')
+        user3.is_superuser = True
+        user3.save()
 
         keyedcache.cache_delete()
-        value = IntegerValue(BASE_GROUP, 'SingleItem')
+        # Example config
+        config_register(IntegerValue(BASE_GROUP, 'SingleItem', default=0))
+
+    def test_unauthorized_form(self):
+        "Testing users without enought additional permission"
+        # usually login_url_mask % nexturl is '/accounts/login/?next=/settings/'
+        login_url_mask = '%s?next=%%s' % reverse('django.contrib.auth.views.login')
+        # unauthorized
+        response = self.client.get(reverse('satchmo_site_settings')) # usually '/settings/'
+        self.assertRedirects(response, login_url_mask % '/settings/', msg_prefix='unathorized user should first login')
+        # few authorized
+        self.client.login(username='warehouseman', password='secret')
+        response = self.client.get(reverse('satchmo_site_settings'))
+        self.assertRedirects(response, login_url_mask % '/settings/', msg_prefix='user with small permission should not read normal settings')
+        # authorized enough but not for secret values
+        self.client.login(username='cautious_developer', password='secret')
+        response = self.client.get(reverse('settings_export'))  # usually '/settings/export/'
+        self.assertRedirects(response, login_url_mask % '/settings/export/', msg_prefix='user without superuser permission should not export sensitive settings')
+
+    def test_authorized_enough(self):
+        "Testing a sufficiently authorized user"
+        self.client.login(username='cautious_developer', password='secret')
+        response = self.client.get(reverse('satchmo_site_settings'))
+        self.assertContains(response, 'SingleItem')
+        self.client.login(username='superuser', password='secret')
+        response = self.client.get(reverse('settings_export'))
+        self.assertContains(response, 'LIVESETTINGS_OPTIONS = ')
+
+    def test_export(self):
+        "Details of exported settings"
+        import re
+        self.client.login(username='superuser', password='secret')
+        val2 = IntegerValue(BASE_GROUP, 'ModifiedItem', default=0)
+        config_register(val2)
+        val2.update(6789)
+        response = self.client.get('/settings/export/')
+        export_pattern = re.compile(r'^LIVESETTINGS_OPTIONS = \\\n'
+                "{1: {'DB': False, 'SETTINGS': {u?'BASE': {u?'ModifiedItem': u?'6789'}}}}", flags=re.MULTILINE)
+        self.assertTrue(re.search(export_pattern, response.content))  # pattern of exported settings
+
+    def test_secret_password(self):
+        "Verify that password is saved but not re-echoed if render_value=False"
+        # example of value, where reading is more sensitive than writing
+        val1 = PasswordValue(BASE_GROUP, 'password_to_reading_external_payment_gateway', render_value=False)
+        config_register(val1)
+        val1.update('secret')
+        val2 = PasswordValue(BASE_GROUP, 'unsecure_password')
+        config_register(val2)
+        val2.update('unsecure_pwd')
+        self.client.login(username='superuser', password='secret')
+        response = self.client.get('/settings/')
+        self.assertContains(response, 'password_to_reading_external_payment_gateway')
+        self.assertNotContains(response, 'secret')
+        self.assertContains(response, 'unsecure_password')
+        self.assertContains(response, 'unsecure_pwd')
+
+
+class WebClientPostTest(TestCase):
+    """
+    Tests of the web interface with POST.
+    These tests require temporary removing all earlier defined values.
+    Then are all values restored because it can be important for testing an application which uses livesettings.
+    """
+    urls = 'livesettings.test_urls'
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+        from django.utils.datastructures import SortedDict
+        # The following hack works like completely replaced ConfigurationSettings internal state only, if
+        # no the same group name is used inside and outside the test.
+        self.saved_conf_inst = ConfigurationSettings._ConfigurationSettings__instance.settings
+        ConfigurationSettings.__dict__['_ConfigurationSettings__instance'].settings = SortedDict()
+        
+        keyedcache.cache_delete()
+        # set new users and values
+        user = User.objects.create_user('admin', 'admin@example.com', 'secret')
+        user.is_superuser = True
+        user.save()
+        self.client.login(username='admin', password='secret')
+        GROUP2 = ConfigurationGroup('Group2', 'g')
+        value = IntegerValue(GROUP2, 'SingleItem')
         config_register(value)
 
-    def testUnauthorized(self):
-        """Unauthorized or staff without enought additional permission"""
-        response = self.client.get('/settings/')
-        self.assertRedirects(response, '/accounts/login/?next=' + reverse('satchmo_site_settings'))
-        self.assertEqual(response.status_code, 302)
-        self.client.login(username='warehouseman', password='secret')
-        response = self.client.get('/settings/')
-        #self.assertRedirects(response.status_code)
-        self.assertEqual(response.status_code, 302)
+    def tearOff(self):
+        # restore the original configuration
+        ConfigurationSettings['_ConfigurationSettings__instance'].settings = self.saved_conf_inst
 
-    def testAuthorizedEnough(self):
-        self.client.login(username='developer', password='secret')
+    def test_post(self):
+        "Tests of POST, verify is saved"
+        response = self.client.post('/settings/', {'Group2__SingleItem': '7890'})
+        # test can not use assertRedirects because it would consume the next get
+        self.assertEqual((response.status_code, response.get('Location', '')), (302, 'http://testserver/settings/'))
         response = self.client.get('/settings/')
-        self.assertContains(response, 'SingleItem')
+        self.assertContains(response, 'Updated')
+        self.assertContains(response, '7890')
+
+    def test_empty_fields(self):
+        "test an empty value in the form should not raise an exception"
+        # Some test features had been temporary commented out before some ..Values classes are fixed
+        # because I do not want to display many old inconsistencies now. (hynekcer)
+        def extract_val(content):
+            regr = re.search(r'SingleItem.*value="([^"]*)"', content, flags=re.MULTILINE)
+            return regr and regr.group(1) or ''   # html value
+        def get_setting_like_in_db(x):
+            try:
+                return x.setting.value
+            except SettingNotSet:
+                return 'Error'
+        def test_empty_value_type(value_type, protocol, reject_empty=False):
+            "empty value can be accepted or rejected by validation rules"
+            value = value_type(GROUP2, 'SingleItem')  # first it does it to easy get the class name
+            type_name = value.__class__.__name__
+            value = value_type(GROUP2, 'SingleItem', description = 'type %s' % type_name)
+            config_register(value)
+            response = self.client.get('/settings/')
+            html_value = extract_val(response.content)
+            #print '%s "%s"' % (type_name, html_value)
+            response = self.client.post('/settings/', {'Group2__SingleItem': ''}) # See in the traceback a line one level Up
+            if reject_empty:
+                # option reject_empty had been tested before all Value types were fixed to be similar accepting empty value
+                # this is a typical text from validation warning
+                self.assertContains(response, 'Please correct the error below.')
+            else:
+                self.assertRedirects(response, '/settings/')
+                response = self.client.get('/settings/')
+                html_value = extract_val(response.content)
+                #print '%s "%s" "%s" "%s"' % (type_name, html_value, value.value, get_setting_like_in_db(value))
+                #self.assertNotContains(response, '&lt;object object at 0x[0-9a-f]+&gt;')  # rendered NOTSET = object()
+                #if re.search('SingleItem.*value="', response.content):
+                #    self.assertTrue(re.search('SingleItem.*value="([0.]*|\[\])"', response.content))
+            protocol.add(value_type)
+        #
+        import re
+        GROUP2 = ConfigurationGroup('Group2', 'g')
+        protocol = set()
+        # tested values
+        test_empty_value_type(BooleanValue, protocol)
+        test_empty_value_type(DecimalValue, protocol)
+        test_empty_value_type(DurationValue, protocol)
+        test_empty_value_type(FloatValue, protocol)
+        test_empty_value_type(IntegerValue, protocol)
+        test_empty_value_type(PercentValue, protocol)
+        test_empty_value_type(PositiveIntegerValue, protocol)
+        test_empty_value_type(StringValue, protocol)
+        test_empty_value_type(LongStringValue, protocol)
+        test_empty_value_type(MultipleStringValue, protocol)
+        test_empty_value_type(LongMultipleStringValue, protocol)
+        test_empty_value_type(ModuleValue, protocol)
+        test_empty_value_type(PasswordValue, protocol)
+        # verify completness of the test
+        classes_to_test = set(getattr(livesettings.values, k) for k in livesettings.values.__all__ if \
+                not k in ('BASE_GROUP', 'ConfigurationGroup', 'Value', 'SortedDotDict'))
+        self.assertEqual(protocol, classes_to_test, msg='The tested classes have been not all exactly the same as expected')
+
+    def test_csrf(self):
+        "test CSRF"
+        from django.test import Client
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.login(username='admin', password='secret')
+        # get CSFR token
+        response = csrf_client.get('/settings/')
+        csrfmiddlewaretoken = str(response.context['csrf_token'])
+        self.assertContains(response, csrfmiddlewaretoken, msg_prefix='has not csrf')
+        # expect OK
+        response = csrf_client.post('/settings/', {'Group2__SingleItem': '1234', 'csrfmiddlewaretoken': csrfmiddlewaretoken})
+        self.assertRedirects(response, expected_url='/settings/')
+        # expect 403
+        response = csrf_client.post('/settings/', {'Group2__SingleItem': '1234'})
+        self.assertContains(response, 'CSRF', status_code=403, msg_prefix='should require csrf')

@@ -1,4 +1,4 @@
-from livesettings import config_register, ConfigurationGroup, PositiveIntegerValue, MultipleStringValue, ModuleValue
+from livesettings import config_register, ConfigurationGroup, IntegerValue, PositiveIntegerValue, MultipleStringValue, ModuleValue
 from django.utils.translation import ugettext_lazy as _
 
 # First, setup a grup to hold all our possible configs
@@ -31,4 +31,11 @@ config_register(ModuleValue(
         #description=_("Measurement System"),
         #help_text=_("Default measurement system to use."),
         default="django"
+    ))
+
+config_register(IntegerValue(
+    MYAPP_GROUP,
+        'SOME_INTEGER',
+        description = _('Some integer value'),
+        help_text = _("It can be also negative."),
     ))
