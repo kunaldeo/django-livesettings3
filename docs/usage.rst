@@ -49,8 +49,8 @@ You can now see the results of your work by running the dev server and going to 
 
     python manage.py runserver
 
-Dislayed values can be limited to only one group if you display `group settings <http://127.0.0.1:8000/settings/MyApp>`_ ::
-where `MyApp` is the key name of the displayed group.
+Dislayed values can be limited to only one group. For example, using the following url: `group settings <http://127.0.0.1:8000/settings/MyApp>`_ ::
+where `MyApp` is the key name of the displayed group, will limit the group to only `MyApp`.
     
 Accessing your value in a view
 ------------------------------
@@ -89,17 +89,18 @@ In order to give non-superusers access to the settings, make sure to use the dja
 Permissions for insert, delete or permission for longsetting are ignored and only the above-mentioned permission is used.
 The same permission is needed to read values.
 
-All views in livesettings support CSRF regardless of enabled or disabled CsrfViewMiddleware,
-because of the security significance of livesettings comparable to Django Admin.
+.. Note::
+    Because of the security significance of livesettings, all views in livesettings support CSRF regardless of whether or not the 
+    CsrfViewMiddleware is enabled or disabled.
 
 If you want store sensitive information to livesettings on production site, e.g. a login password for a payment gateway to verify payments,
-it can be recommended to remove permission to livesettings at least from users which are beeing logged everyday including yourself,
-or the most secure is to export them and disable livesettings as described below.
-Exporting settings itself is allowed only to the superuser.
+we recommend removing permissions to livesettings at least from users which are logging in everyday. The most secure method is to export the settings and disable livesettings as described below.
+Exporting settings itself is allowed only by the superuser.
 
 For password values it is recommended to define them by PasswordValue(... render_value=False)
-to be actual password not re-echoed to browser.
-Thought passwords are hidden by asterisks to human reader in the web browser, should be considered accessibility by attacker's javascripts.
+so that the actual password is not re-echoed to the browser.
+Though passwords are hidden by asterisks to human reader, they should still be considered accessible by attacker's javascripts. In other words,
+if a user can view the password fields, they could determine the
 
 Exporting Settings
 ------------------
