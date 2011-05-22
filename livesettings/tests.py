@@ -655,9 +655,9 @@ class WebClientPostTest(TestCase):
         value = IntegerValue(GROUP2, 'SingleItem')
         config_register(value)
 
-    def tearOff(self):
+    def tearDown(self):
         # restore the original configuration
-        ConfigurationSettings['_ConfigurationSettings__instance'].settings = self.saved_conf_inst
+        ConfigurationSettings.__dict__['_ConfigurationSettings__instance'].settings = self.saved_conf_inst
 
     def test_post(self):
         "Tests of POST, verify is saved"
