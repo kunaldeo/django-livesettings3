@@ -31,6 +31,10 @@ except:
 
 log = logging.getLogger('configuration')
 
+# The constant NOTSET is a placeholder for an uninitialized value (which has no
+# default in the user's application and no value in the database).
+# It is different from None or "" which are result of an empty field in the form.
+# It leads to to the existing more complicated code of Values classes, hopefully more robust.
 NOTSET = object()
 
 class SortedDotDict(SortedDict):
