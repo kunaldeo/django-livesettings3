@@ -52,6 +52,16 @@ You can now see the results of your work by running the dev server and going to 
 Dislayed values can be limited to only one group. For example, using the following url: `group settings <http://127.0.0.1:8000/settings/MyApp>`_ ::
 where `MyApp` is the key name of the displayed group, will limit the group to only `MyApp`.
     
+More examples for all implemented types of ..Values can be found in
+:file:`livesettings/test_app/localsite/config.py`::
+including configuration groups which are enabled or disabled based on modules selected in the form.
+You can review examples by:
+
+    cd livesettings/test_app
+    python manage.py runserver
+    
+and browse `<http://127.0.0.1:8000/settings/>`.
+
 Accessing your value in a view
 ------------------------------
 
