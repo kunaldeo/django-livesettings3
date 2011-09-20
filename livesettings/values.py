@@ -525,11 +525,21 @@ class IntegerValue(Value):
             return unicode(value)
 
 
+# Deprecated PercentValue does not work good and can not be fixed
+# without duplicating long modified parts of Django. #29
+# It is better to Replace PercentValue(...) by DecimalValue(... min_value=0, max_value=100, max_decimal_places=2)
+# and easily divide result value by 100 in the user application.
 class PercentValue(Value):
 
     class field(forms.DecimalField):
 
         def __init__(self, *args, **kwargs):
+            import warnings
+            warnings.warn(
+                "class livesettings.PercentValue is deprecated. It should be replaced in config.py by " \
+                "DecimalValue(... min_value=0, max_value=100) and the result divided by 100 in the app.",
+                DeprecationWarning
+            )
             kwargs['required'] = False
             forms.DecimalField.__init__(self, 100, 0, 5, 2, *args, **kwargs)
 

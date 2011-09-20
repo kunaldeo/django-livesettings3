@@ -713,7 +713,6 @@ class WebClientPostTest(TestCase):
         test_empty_value_type(DurationValue, protocol)
         test_empty_value_type(FloatValue, protocol)
         test_empty_value_type(IntegerValue, protocol)
-        test_empty_value_type(PercentValue, protocol)
         test_empty_value_type(PositiveIntegerValue, protocol)
         test_empty_value_type(StringValue, protocol)
         test_empty_value_type(LongStringValue, protocol)
@@ -723,7 +722,7 @@ class WebClientPostTest(TestCase):
         test_empty_value_type(PasswordValue, protocol)
         # verify completness of the test
         classes_to_test = set(getattr(livesettings.values, k) for k in livesettings.values.__all__ if \
-                not k in ('BASE_GROUP', 'ConfigurationGroup', 'Value', 'SortedDotDict'))
+                not k in ('BASE_GROUP', 'ConfigurationGroup', 'Value', 'SortedDotDict', 'PercentValue'))
         self.assertEqual(protocol, classes_to_test, msg='The tested classes have been not all exactly the same as expected')
 
     def test_csrf(self):

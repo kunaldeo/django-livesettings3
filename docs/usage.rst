@@ -116,7 +116,7 @@ Here is a simple example of what the extract will look like::
     {   1: {   'DB': False,
                'SETTINGS': {   u'MyApp': {   u'DECIMAL_TEST': u'34.0923443',
                                              u'MEASUREMENT_SYSTEM': u'["metric"]',
-                                             u'PERCENT_TEST': u'0.251'}}}}
+                                             u'STRING_TEST': u'Orange'}}}}
 
 In order to restrict or enable DB access, use the following line in your settings::
 

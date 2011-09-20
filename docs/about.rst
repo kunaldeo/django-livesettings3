@@ -12,7 +12,6 @@ Livesettings supports several types of input choices:
     * Duration
     * Float
     * Integer
-    * Percent
     * Positive Integer
     * String
     * Long string
