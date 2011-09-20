@@ -422,18 +422,16 @@ class BooleanValue(Value):
 class DecimalValue(Value):
     class field(forms.DecimalField):
 
-            def __init__(self, *args, **kwargs):
-                kwargs['required'] = False
-                forms.DecimalField.__init__(self, *args, **kwargs)
-               
-            def clean(self, value):
-                value = super(forms.DecimalField, self).clean(value)
-                if value == None:
-                    return Decimal("0")
-                try:
-                    return unicode(Decimal(value))
-                except:
-                    raise forms.ValidationError('This value must be a decimal number.')
+        def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
+            forms.DecimalField.__init__(self, *args, **kwargs)
+
+        def clean(self, value):
+            # Parent "clean" calls "DecimaField.to_python" which converts value to Decimal or None.
+            value = super(DecimalValue.field, self).clean(value)
+            if value == None:
+                return Decimal("0")
+            return Decimal(value)
 
     def to_python(self, value):
         if value == NOTSET:
@@ -451,9 +449,9 @@ class DecimalValue(Value):
         else:
             return unicode(value)
 
-# DurationValue has a lot of duplication and ugliness because of issue #2443
-# Until DurationField is sorted out, this has to do some extra work
 class DurationValue(Value):
+    # DurationValue has a lot of duplication and ugliness because DurationField
+    # probably never will be accepted into Django code (issue #2443).
 
     class field(forms.CharField):
 
