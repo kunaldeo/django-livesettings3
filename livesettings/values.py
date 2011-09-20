@@ -350,7 +350,7 @@ class Value(object):
                 except SettingNotSet:
                     s = self.make_setting(db_value)
 
-                if self.use_default and self.default == new_value:
+                if self.use_default and self.to_python(self.default) == self.to_python(new_value):
                     if s.id:
                         log.info("Deleted setting %s.%s", self.group.key, self.key)
                         s.delete()
