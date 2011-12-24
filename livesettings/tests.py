@@ -554,7 +554,6 @@ class PermissionTest(TestCase):
     def setUp(self):
         from django.contrib.auth.models import Permission, User
         from django.contrib.contenttypes.models import ContentType
-
         # Users with different permissions
         # staff member
         user1 = User.objects.create_user('warehouseman', 'john@example.com', 'secret')
@@ -602,15 +601,15 @@ class PermissionTest(TestCase):
 
     def test_export(self):
         "Details of exported settings"
-        import re
         self.client.login(username='superuser', password='secret')
         val2 = IntegerValue(BASE_GROUP, 'ModifiedItem', default=0)
         config_register(val2)
         val2.update(6789)
         response = self.client.get('/settings/export/')
-        export_pattern = re.compile(r'^LIVESETTINGS_OPTIONS = \\\n'
-                "{1: {'DB': False, 'SETTINGS': {u?'BASE': {u?'ModifiedItem': u?'6789'}}}}", flags=re.MULTILINE)
-        self.assertTrue(re.search(export_pattern, response.content))  # pattern of exported settings
+        self.assertContains(response, "LIVESETTINGS_OPTIONS =", 1)
+        self.assertContains(response, "'DB': False", 1)
+        self.assertContains(response, "u'BASE':",1)
+        self.assertContains(response, " u'ModifiedItem': u'6789'",1)
 
     def test_secret_password(self):
         "Verify that password is saved but not re-echoed if render_value=False"
