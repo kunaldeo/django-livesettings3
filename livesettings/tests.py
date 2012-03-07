@@ -609,7 +609,7 @@ class PermissionTest(TestCase):
         self.assertContains(response, "LIVESETTINGS_OPTIONS =", 1)
         self.assertContains(response, "'DB': False", 1)
         self.assertContains(response, "u'BASE':",1)
-        self.assertContains(response, " u'ModifiedItem': u'6789'",1)
+        self.assertContains(response, "u'ModifiedItem': u'6789'", 1)
 
     def test_secret_password(self):
         "Verify that password is saved but not re-echoed if render_value=False"
