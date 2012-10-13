@@ -15,6 +15,15 @@
      {% trans "Edit Group Settings" %}
 </div>
 {% endif %}{% endblock %}
+
+{% block messages %}
+    {% if messages %}
+    <ul class="messagelist">{% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}</ul>
+    {% endif %}
+{% endblock messages %}
+
 {% block content %}
 <div id="content-main">
 {% if form.errors %}
