@@ -3,7 +3,7 @@
 
 {% block stylesheet %}{{ ADMIN_MEDIA_PREFIX }}css/forms.css{% endblock %}
 {% block extrahead %}{{ block.super }}
-<script type="text/javascript" src="{% url admin:jsi18n %}"></script>
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 <script type="text/javascript" src="{{ ADMIN_MEDIA_PREFIX }}js/core.js"></script>
 {% if DJANGO_PRE_12 %}
 <script type="text/javascript" src="{{ ADMIN_MEDIA_PREFIX }}js/admin/CollapsedFieldsets.js"></script>
@@ -44,10 +44,10 @@ div.fieldcontainer { float: left; margin-right: 0; }
 {% endblock %}
 {% block coltype %}colMS{% endblock %}
 {% block bodyclass %}dashboard{% endblock %}
-{% block userlinks %}<a href="{% url admin:index %}doc/">{% trans 'Documentation' %}</a> / <a href="{% url admin:index %}password_change/">{% trans 'Change password' %}</a> / <a href="{% url admin:index %}logout/">{% trans 'Log out' %}</a>{% endblock %}
+{% block userlinks %}<a href="{% url 'admin:index' %}doc/">{% trans 'Documentation' %}</a> / <a href="{% url 'admin:index' %}password_change/">{% trans 'Change password' %}</a> / <a href="{% url 'admin:index' %}logout/">{% trans 'Log out' %}</a>{% endblock %}
 {% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
-	<a href="{% url admin:index %}">{% trans "Home" %}</a> &rsaquo;
+	<a href="{% url 'admin:index' %}">{% trans "Home" %}</a> &rsaquo;
 	{% trans "Edit Site Settings" %}
 </div>
 {% endif %}{% endblock %}
@@ -115,7 +115,7 @@ div.fieldcontainer { float: left; margin-right: 0; }
 	<br class="clear:both;" />
 	<input type="submit" value="{% trans 'Update Settings' %}" />
 	<p><a onclick="javascript:return uncollapse();" href="#">{% trans 'Uncollapse all' %}</a></p>
-	<p><a href="{% url settings_export %}">{% trans 'Export' %}</a></p>
+	<p><a href="{% url 'settings_export' %}">{% trans 'Export' %}</a></p>
 	</form>
 	{% else %}
 		<p>{% trans "You don't have permission to edit values." %}</p>

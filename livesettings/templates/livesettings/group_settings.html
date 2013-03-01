@@ -8,10 +8,10 @@
 {% block stylesheet %}{{ ADMIN_MEDIA_PREFIX }}css/forms.css{% endblock %}
 {% block coltype %}colMS{% endblock %}
 {% block bodyclass %}dashboard{% endblock %}
-{% block userlinks %}<a href="{% url admin:index %}doc/">{% trans 'Documentation' %}</a> / <a href="{% url admin:index %}password_change/">{% trans 'Change password' %}</a> / <a href="{% url admin:index %}logout/">{% trans 'Log out' %}</a>{% endblock %}
+{% block userlinks %}<a href="{% url 'admin:index' %}doc/">{% trans 'Documentation' %}</a> / <a href="{% url 'admin:index' %}password_change/">{% trans 'Change password' %}</a> / <a href="{% url 'admin:index' %}logout/">{% trans 'Log out' %}</a>{% endblock %}
 {% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
-     <a href="{% url admin:index %}">{% trans "Home" %}</a> &rsaquo;
+     <a href="{% url 'admin:index' %}">{% trans "Home" %}</a> &rsaquo;
      {% trans "Edit Group Settings" %}
 </div>
 {% endif %}{% endblock %}
