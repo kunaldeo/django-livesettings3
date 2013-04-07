@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 # Imported '*' because Django 1.2 requires importing handler404+500 in the main
 # urls or have customized their templates. Django 1.3 does not require it.
 from django.contrib import admin
