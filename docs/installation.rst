@@ -5,7 +5,7 @@ Requirements
 ------------
 
  * `Python`_ 2.5 or higher
- * `Django`_ 1.2.3 or higher
+ * `Django`_ 1.4.x or 1.5.x
  * `Django-Keyedcache`_
 
 .. Note 
@@ -29,6 +29,12 @@ Add livesettings to your installed apps in :file:`settings.py`::
         'myapp'
         ...
     )
+
+It is high recommended to configure a global cache (like `MemcachedCache`) for
+multiprocess servers! Otherwise the processes would not be notified about new
+values with the default `LocMemCache`. The default configuration is safe for
+a debug server (manage.py runserver).
+
 
 Add it to your :file:`urls.py`::
 
