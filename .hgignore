@@ -22,3 +22,4 @@ build
 satchmo
 local_bursar_*py
 .DS_Store
+setuptools_hg-*
