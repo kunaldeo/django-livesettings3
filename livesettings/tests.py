@@ -731,7 +731,7 @@ class WebClientPostTest(TestCase):
         csrf_client.login(username='admin', password='secret')
         # get CSFR token
         response = csrf_client.get('/settings/')
-        csrfmiddlewaretoken = str(response.context['csrf_token'])
+        csrfmiddlewaretoken = response.context['csrf_token'] + ''
         self.assertContains(response, csrfmiddlewaretoken, msg_prefix='has not csrf')
         # expect OK
         response = csrf_client.post('/settings/', {'Group2__SingleItem': '1234', 'csrfmiddlewaretoken': csrfmiddlewaretoken})

@@ -224,7 +224,7 @@ class Value(object):
                 work = []
                 for x in self.choices:
                     if x[0] in self.default:
-                        work.append(smart_str(x[1]))
+                        work.append('%s' % smart_str(x[1]))
                 note = gettext('Default value: ') + ", ".join(work)
 
             else:
