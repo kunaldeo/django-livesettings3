@@ -1,4 +1,5 @@
-"Examples for livesettings" 
+"""Examples for livesettings"""
+
 from livesettings.values import *
 from livesettings import config_register, config_register_list
 from django.utils.translation import ugettext_lazy as _
@@ -16,7 +17,7 @@ config_register(PositiveIntegerValue(
         'NUM_IMAGES',
         description = _('Number of images to display'),
         help_text = _("How many images to display on front page."),
-        # if no help_hext is given, Default falue is displayed
+        # if no help_text is given, Default falue is displayed
         default = 5
     ))
 
@@ -121,52 +122,65 @@ config_register_list(
 )
 
 
-# Example of enabling modules which have own settings groups in different files
+# Example of conditional items (fiels or modules) that can by enabled/disabled
+# by selecting in some choises list.
+# These contitional items and their corresponding choice for enable/disable can
+# be independently installed/uninstalled by adding a new config.py file (like
+# plugins - without modifying another file)
+# (Here is the second part under the line below.)
 
-GR_MOD_FLYING = ConfigurationGroup('FLYING', 
-        _('Examples for modules - enabling subsettings of modules for... e.g. Flying :-)'), ordering=3)
+GR_MY_CONDITIONAL = ConfigurationGroup('MY_CONDITIONAL', 
+        _('Enable and configure conditional modules'), ordering=3)
 
 # Every module can have its own set of specific live settings, which are enabled/disabled together with a module.
 
-FLYING_MODULES = MultipleStringValue( GR_MOD_FLYING, 'MODULES',
-        description=_('Modules for Flying'),
-        choices=(('calendar', 'calendar'),),
+MY_CONDITIONAL_SWITCHES = MultipleStringValue(GR_MY_CONDITIONAL, 'MODULES',
+        description=_('Conditional modules'),
+        choices=(('calendar', 'Calendar module'),),
         default=['calendar',],
-        help_hext='Try to enable/disable these modules and save to see a more os less dependent settings',
+        help_text='Enable/Disable some of these modules and press Update to see more/less settings fields or groups',
     )
 
+# A contitionally displayed field
 config_register_list(
-    FLYING_MODULES,
+    MY_CONDITIONAL_SWITCHES,
 
-    StringValue(GR_MOD_FLYING, 'first_day', description='Calendar - First day of week', default='Monday',
+    StringValue(GR_MY_CONDITIONAL, 'first_day', description='Calendar - First day of week', default='Monday',
         ordering=1,
         choices=zip(* 2 * (('Sunday', 'Monday'),)),
-        requires=FLYING_MODULES,
+        requires=MY_CONDITIONAL_SWITCHES,
         requiresvalue='calendar',
+        help_text = 'Visibility of this field depends on selecting the item "Calendar" above.'
     )
 
 )
 
-# ==== This part is usually located in a separate file control.py in optional's module directory
+# ==========================================================================================
+# This part is usually located in a separate file control.py in optional's module directory
+# and can be completely removed. That only removes some one conditional group and its
+# choice in MY_CONDITIONAL_SWITCHES.
 
 from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
 from livesettings import *
 
-FLYING_MODULES = config_get('FLYING', 'MODULES')
-FLYING_MODULES.add_choice(('django.contrib.webdesign.lorem_ipsum', 'Lorem Ipsum'))
+# add a new choice to main choises where this module can be enabled
+MY_CONDITIONAL_SWITCHES = config_get('MY_CONDITIONAL', 'MODULES')
+MY_CONDITIONAL_SWITCHES.add_choice(('django.contrib.webdesign.lorem_ipsum', 'Random text module'))
 
-LOREM_GROUP = ConfigurationGroup('django.contrib.webdesign.lorem_ipsum',
-    _('Lorem Ipsum Settings'),
-    requires = FLYING_MODULES,
+# create a conditional configuration group and some item.
+MY_FIRST_OPTIONAL_GROUP = ConfigurationGroup('django.contrib.webdesign.lorem_ipsum',
+    _('Random Text Module Settings'),
+    requires = MY_CONDITIONAL_SWITCHES,
     requiresvalue='django.contrib.webdesign.lorem_ipsum',
     ordering = 101)
 
 config_register_list(
-    ModuleValue(LOREM_GROUP, 'MODULE', default='django.contrib.webdesign.lorem_ipsum', hidden=True),
+    ModuleValue(MY_FIRST_OPTIONAL_GROUP, 'MODULE', default='django.contrib.webdesign.lorem_ipsum', hidden=True),
 
-    MultipleStringValue(LOREM_GROUP, 'lorem_words', description='Lorem ipsum words',
-        choices= zip(* 2 * ('lorem ipsum dolor sit amet'.split(),))
+    MultipleStringValue(MY_FIRST_OPTIONAL_GROUP, 'lorem_words', description='Random words',
+        choices= zip(* 2 * ('lorem ipsum dolor sit amet'.split(),)),
+        help_text = 'Visibility of this group depends on selecting the item "Random text module" above.',
     )
 )
 

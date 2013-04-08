@@ -1,14 +1,17 @@
 Usage
 =====
 
-A very simple example project is in the directory :file:`livesettings/test_app`. It is almost identical to the following description and is a useful example for integrating livesettings into your app.
+An example project is in the directory :file:`test-project`.
+It's beginning isidentical to the following description and is a useful example for integrating livesettings into your app.
 
 Creating Config.py
 ------------------
 
-In order to use livesettings, you will need to create a :file:`config.py` in your django application. For this example, we will create a :file:`config.py` file in the 'myapp' directory.
+In order to use livesettings, you will need to create a :file:`config.py` in your django application.
+For this example, we will create a :file:`config.py` file in the 'test-project/localsite' directory.
 
-For this specific app, we want to allow an admin user to control how many images are displayed on the front page of our site. We will create the following :file:`config.py`::
+Example: "For this specific app, we want to allow an admin user to control how many images are displayed on the front page of our site."
+We will create the following :file:`config.py`::
 
     from livesettings import config_register, ConfigurationGroup, PositiveIntegerValue, MultipleStringValue
     from django.utils.translation import ugettext_lazy as _
@@ -49,15 +52,17 @@ You can now see the results of your work by running the dev server and going to 
 
     python manage.py runserver
 
-Dislayed values can be limited to only one group. For example, using the following url: `group settings <http://127.0.0.1:8000/settings/MyApp>`_ ::
-where `MyApp` is the key name of the displayed group, will limit the group to only `MyApp`.
-    
+Dislayed values can be limited to a configuration group by the url. For example
+we want to do experiments with configuration group `MyApp` only:
+`group settings <http://127.0.0.1:8000/settings/MyApp>`_ ::
+where `MyApp` is the key name of the displayed group.
+
 More examples for all implemented types of ..Values can be found in
-:file:`livesettings/test_app/localsite/config.py`::
+:file:`test-project/localsite/config.py`::
 including configuration groups which are enabled or disabled based on modules selected in the form.
 You can review examples by:
 
-    cd livesettings/test_app
+    cd test-project
     python manage.py runserver
     
 and browse `<http://127.0.0.1:8000/settings/>`.
@@ -91,26 +96,28 @@ Using the value in your :file:`index.html` is straightforward::
 Security and Restricting Access to Livesettings
 -----------------------------------------------
 
-In order to give non-superusers access to the settings, make sure to use the django user permission admin screen to give the desired user the *livesettings|setting|Can change settting*.
+In order to give non-superusers access to the /settings/ views, open Django Admin Auth screen
+and give the user or to its group the permission *livesettings|setting|Can change settting*.
+The same permission is needed to view the form and submit.
+Permissions for insert or delete and any permissions for "long setting" are ignored.
 
 .. Note::
-    Superusers will have access to this setting without enabling any specific permissions
+    Superusers will have access to this setting without enabling any specific permissions.
 
-Permissions for insert, delete or permission for longsetting are ignored and only the above-mentioned permission is used.
-The same permission is needed to read values.
 
 .. Note::
     Because of the security significance of livesettings, all views in livesettings support CSRF regardless of whether or not the 
     CsrfViewMiddleware is enabled or disabled.
 
-If you want store sensitive information to livesettings on production site, e.g. a login password for a payment gateway to verify payments,
-we recommend removing permissions to livesettings at least from users which are logging in everyday. The most secure method is to export the settings and disable livesettings as described below.
+If you want to save a sensitive information to livesettings on production site (e.g. a password for logging into other web service)
+it is recommended not to grant permissions to livesettings to users which are logging in everyday.
+The most secure method is to export the settings and disable web access to livesettings as described below.
 Exporting settings itself is allowed only by the superuser.
 
-For password values it is recommended to define them by PasswordValue(... render_value=False)
-so that the actual password is not re-echoed to the browser.
-Though passwords are hidden by asterisks to human reader, they should still be considered accessible by attacker's javascripts. In other words,
-if a user can view the password fields, they could determine the
+Password values should be declared by `PasswordValue(... render_value=False)`
+that replaces password characters by asterisks in the browser. (Though hidden
+to a human observer, password is still accessible by attacker's javascripts or
+by connection eavesdropping.)
 
 Exporting Settings
 ------------------

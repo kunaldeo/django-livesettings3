@@ -1,6 +1,7 @@
 <html><body>
-<pre>
-<p>Measurement system: {{ measurement_system }}</p>
-<p>Image count: {{ image_count }}</p>
-<p><a href="{% url satchmo_site_settings %}">Values can be modified</a> if the user has sufficient permissions (livesettings_setting:change).</p>
+<table border="1">
+    <tr><td>Measurement system:</td><td>{{ measurement_system }}</td></tr>
+    <tr><td>Image count:       </td><td>{{ image_count }}</td></tr>
+</table>
+<p>Values <a href="{% url satchmo_site_settings %}">can be modified here</a> if the user has sufficient permissions (livesettings_setting:change).</p>
 </body></html>
