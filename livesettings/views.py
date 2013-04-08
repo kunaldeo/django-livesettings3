@@ -1,4 +1,3 @@
-from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
@@ -8,13 +7,9 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.cache import never_cache
 from livesettings import ConfigurationSettings, forms
 from livesettings.overrides import get_overrides
-import django
 import logging
 
 log = logging.getLogger('livesettings.views')
-
-def _pre_12():
-    return django.VERSION < (1, 2)
 
 @csrf_protect
 def group_settings(request, group, template='livesettings/group_settings.html'):
@@ -57,18 +52,11 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
     else:
         form = None
 
-    if django.VERSION < (1, 4):
-        ADMIN_MEDIA_PREFIX = djangosettings.ADMIN_MEDIA_PREFIX
-    else:
-        ADMIN_MEDIA_PREFIX = djangosettings.STATIC_URL + 'admin/'
-
     return render_to_response(template, {
         'title': title,
         'group' : group,
         'form': form,
         'use_db' : use_db,
-        'ADMIN_MEDIA_PREFIX' : ADMIN_MEDIA_PREFIX,
-        'DJANGO_PRE_12' : _pre_12()
     }, context_instance=RequestContext(request))
 group_settings = never_cache(permission_required('livesettings.change_setting')(group_settings))
 

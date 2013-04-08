@@ -1,21 +1,14 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_modify config_tags %}{% load url from future %}
+{% load i18n admin_static config_tags %}{% load url from future %}
 
-{% block stylesheet %}{{ ADMIN_MEDIA_PREFIX }}css/forms.css{% endblock %}
+{% block stylesheet %}{% static "admin/css/forms.css" %}{% endblock %}
+
 {% block extrahead %}{{ block.super }}
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
-<script type="text/javascript" src="{{ ADMIN_MEDIA_PREFIX }}js/core.js"></script>
-{% if DJANGO_PRE_12 %}
-<script type="text/javascript" src="{{ ADMIN_MEDIA_PREFIX }}js/admin/CollapsedFieldsets.js"></script>
-<script type="text/javascript">
-var uncollapse = function () {
-    CollapsedFieldsets.uncollapse_all();
-    return false;
-}
-</script>
-{% else %}
-<script type="text/javascript" src="{{ ADMIN_MEDIA_PREFIX }}js/jquery.init.js"></script>
-<script type="text/javascript" src="{{ ADMIN_MEDIA_PREFIX }}js/collapse.js"></script>
+<script type="text/javascript" src="{% static "admin/js/core.js" %}"></script>
+<script type="text/javascript" src="{% static "admin/js/jquery.js" %}"></script>
+<script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+<script type="text/javascript" src="{% static "admin/js/collapse.js" %}"></script>
 <script type="text/javascript">
 var $ = django.jQuery,
 uncollapse = function() {
@@ -29,22 +22,26 @@ uncollapse = function() {
            return false
 };
 </script>
-{% endif %}
 {% endblock %}
+
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" type="text/css" href="{{ ADMIN_MEDIA_PREFIX }}css/base.css" />
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/base.css" %}" />
 <style type="text/css">
-ul.fieldref { margin: 0; padding: 0; font-size: 9px; }
-ul.fieldref li { float: left; margin: 0 10px 0 0; list-style: none; }
-fieldset.collapsed h2 { display: block !important; }
-fieldset.collapsed h2 a { display: inline !important; }
-div.fieldcontainer { float: left; margin-right: 0; }
+    ul.fieldref { margin: 0; padding: 0; font-size: 9px; }
+    ul.fieldref li { float: left; margin: 0 10px 0 0; list-style: none; }
+    fieldset.collapsed h2 { display: block !important; }
+    fieldset.collapsed h2 a { display: inline !important; }
+    div.fieldcontainer { float: left; margin-right: 0; }
 </style>
 {% endblock %}
+
 {% block coltype %}colMS{% endblock %}
+
 {% block bodyclass %}dashboard{% endblock %}
+
 {% block userlinks %}<a href="{% url 'admin:index' %}doc/">{% trans 'Documentation' %}</a> / <a href="{% url 'admin:index' %}password_change/">{% trans 'Change password' %}</a> / <a href="{% url 'admin:index' %}logout/">{% trans 'Log out' %}</a>{% endblock %}
+
 {% block breadcrumbs %}{% if not is_popup %}
 <div class="breadcrumbs">
 	<a href="{% url 'admin:index' %}">{% trans "Home" %}</a> &rsaquo;
