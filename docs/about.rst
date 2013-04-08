@@ -12,7 +12,7 @@ Livesettings supports several types of input choices:
     * Duration
     * Float
     * Integer
-    * Positive Integer
+    * Positive Integer (non negative)
     * String
     * Long string
     * Multiple strings

@@ -574,7 +574,9 @@ class PercentValue(Value):
         else:
             return unicode(value)
 
+
 class PositiveIntegerValue(IntegerValue):
+    """Non negative integer value. (positive or zero)."""
 
     class field(forms.IntegerField):
 
