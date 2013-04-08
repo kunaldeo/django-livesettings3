@@ -4,8 +4,8 @@ Installation
 Requirements
 ------------
 
- * `Python`_ 2.5 or higher
- * `Django`_ 1.4.x or 1.5.x
+ * `Python`_ 2.5+, 2.6+ or 2.7+
+ * `Django`_ 1.4+ or 1.5+
  * `Django-Keyedcache`_
 
 .. Note 
