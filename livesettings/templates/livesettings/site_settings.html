@@ -1,8 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static config_tags %}{% load url from future %}
 
-{% block stylesheet %}{% static "admin/css/forms.css" %}{% endblock %}
-
 {% block extrahead %}{{ block.super }}
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 <script type="text/javascript" src="{% static "admin/js/core.js" %}"></script>
@@ -26,7 +24,7 @@ uncollapse = function() {
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% static "admin/css/base.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
 <style type="text/css">
     ul.fieldref { margin: 0; padding: 0; font-size: 9px; }
     ul.fieldref li { float: left; margin: 0 10px 0 0; list-style: none; }

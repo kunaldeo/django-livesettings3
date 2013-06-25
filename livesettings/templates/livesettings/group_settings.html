@@ -2,10 +2,9 @@
 {% load i18n config_tags %}{% load url from future %}
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% static "admin/css/base.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}" />
 {% endblock %}
 
-{% block stylesheet %}{% static "admin/css/forms.css" %}{% endblock %}
 {% block coltype %}colMS{% endblock %}
 {% block bodyclass %}dashboard{% endblock %}
 {% block userlinks %}<a href="{% url 'admin:index' %}doc/">{% trans 'Documentation' %}</a> / <a href="{% url 'admin:index' %}password_change/">{% trans 'Change password' %}</a> / <a href="{% url 'admin:index' %}logout/">{% trans 'Log out' %}</a>{% endblock %}
