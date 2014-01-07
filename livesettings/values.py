@@ -6,7 +6,7 @@ from decimal import Decimal
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, DatabaseError
-from django.utils import simplejson
+import json
 from django.utils.datastructures import SortedDict
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -670,7 +670,7 @@ class MultipleStringValue(Value):
     def get_db_prep_save(self, value):
         if is_string_like(value):
             value = [value]
-        return simplejson.dumps(value)
+        return json.dumps(value)
 
     def to_python(self, value):
         if not value or value == NOTSET:
@@ -679,7 +679,7 @@ class MultipleStringValue(Value):
             return value
         else:
             try:
-                return simplejson.loads(value)
+                return json.loads(value)
             except:
                 if is_string_like(value):
                     return [value]
