@@ -3,10 +3,14 @@
 http://code.google.com/p/django-values/
 """
 from decimal import Decimal
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
+
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, DatabaseError
-import json
 from django.utils.datastructures import SortedDict
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
