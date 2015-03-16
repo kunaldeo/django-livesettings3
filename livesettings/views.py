@@ -83,7 +83,7 @@ def export_as_python(request):
     pp = pprint.PrettyPrinter(indent=4)
     pretty = pp.pformat(work)
 
-    return render_to_response('livesettings/text.txt', { 'text' : pretty }, mimetype='text/plain')
+    return render_to_response('livesettings/text.txt', { 'text' : pretty }, content_type='text/plain')
 
 # Required permission `is_superuser` is equivalent to auth.change_user,
 # because who can modify users, can easy became a superuser.

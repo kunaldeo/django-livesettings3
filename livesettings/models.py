@@ -88,7 +88,13 @@ class SettingNotSet(Exception):
 
 class SettingManager(models.Manager):
     def get_query_set(self):
-        all = super(SettingManager, self).get_query_set()
+        return self.get_queryset()
+
+    def get_queryset(self):
+	if hasattr(super(SettingManager, self), 'get_queryset'):
+            all = super(SettingManager, self).get_queryset()
+        else:
+            all = super(SettingManager, self).get_query_set()
         siteid = _safe_get_siteid(None)
         return all.filter(site__id__exact=siteid)
 
@@ -148,7 +154,13 @@ class Setting(models.Model, CachedObjectMixin):
 
 class LongSettingManager(models.Manager):
     def get_query_set(self):
-        all = super(LongSettingManager, self).get_query_set()
+        return self.get_queryset()
+
+    def get_queryset(self):
+	if hasattr(super(LongSettingManager, self), 'get_queryset'):
+            all = super(LongSettingManager, self).get_queryset()
+        else:
+            all = super(LongSettingManager, self).get_query_set()
         siteid = _safe_get_siteid(None)
         return all.filter(site__id__exact=siteid)
 
