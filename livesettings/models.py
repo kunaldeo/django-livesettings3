@@ -42,13 +42,13 @@ def _safe_get_siteid(site):
 
 def find_setting(group, key, site=None):
     """Get a setting or longsetting by group and key, cache and return it."""
-       
+
     siteid = _safe_get_siteid(site)
     setting = None
-    
+
     use_db, overrides = get_overrides(siteid)
     ck = cache_key('Setting', siteid, group, key)
-    
+
     if use_db:
         try:
             setting = cache_get(ck)
@@ -62,10 +62,10 @@ def find_setting(group, key, site=None):
                     # maybe it is a "long setting"
                     try:
                         setting = LongSetting.objects.get(site__id__exact=siteid, key__exact=key, group__exact=group)
-           
+
                     except LongSetting.DoesNotExist:
                         pass
-            
+
                 cache_set(ck, value=setting)
 
     else:
@@ -74,13 +74,13 @@ def find_setting(group, key, site=None):
             val = grp[key]
             setting = ImmutableSetting(key=key, group=group, value=val)
             log.debug('Returning overridden: %s', setting)
-                
+
     if not setting:
         raise SettingNotSet(key, cachekey=ck)
 
     return setting
 
-class SettingNotSet(Exception):    
+class SettingNotSet(Exception):
     def __init__(self, k, cachekey=None):
         self.key = k
         self.cachekey = cachekey
@@ -100,22 +100,22 @@ class SettingManager(models.Manager):
 
 
 class ImmutableSetting(object):
-    
+
     def __init__(self, group="", key="", value="", site=1):
         self.site = site
         self.group = group
         self.key = key
         self.value = value
-        
+
     def cache_key(self, *args, **kwargs):
         return cache_key('OverrideSetting', self.site, self.group, self.key)
-        
+
     def delete(self):
         pass
-        
+
     def save(self, *args, **kwargs):
         pass
-        
+
     def __repr__(self):
         return "ImmutableSetting: %s.%s=%s" % (self.group, self.key, self.value)
 
@@ -143,11 +143,11 @@ class Setting(models.Model, CachedObjectMixin):
             site = self.site
         except Site.DoesNotExist:
             self.site = Site.objects.get_current()
-            
+
         super(Setting, self).save(force_insert=force_insert, force_update=force_update)
-        
+
         self.cache_set()
-        
+
     class Meta:
         unique_together = ('site', 'group', 'key')
 
@@ -157,10 +157,11 @@ class LongSettingManager(models.Manager):
         return self.get_queryset()
 
     def get_queryset(self):
-	if hasattr(super(LongSettingManager, self), 'get_queryset'):
+    	if hasattr(super(LongSettingManager, self), 'get_queryset'):
             all = super(LongSettingManager, self).get_queryset()
         else:
             all = super(LongSettingManager, self).get_query_set()
+
         siteid = _safe_get_siteid(None)
         return all.filter(site__id__exact=siteid)
 
@@ -178,7 +179,7 @@ class LongSetting(models.Model, CachedObjectMixin):
 
     def cache_key(self, *args, **kwargs):
         # note same cache pattern as Setting.  This is so we can look up in one check.
-        # they can't overlap anyway, so this is moderately safe.  At the worst, the 
+        # they can't overlap anyway, so this is moderately safe.  At the worst, the
         # Setting will override a LongSetting.
         return cache_key('Setting', self.site, self.group, self.key)
 
@@ -193,7 +194,7 @@ class LongSetting(models.Model, CachedObjectMixin):
             self.site = Site.objects.get_current()
         super(LongSetting, self).save(force_insert=force_insert, force_update=force_update)
         self.cache_set()
-        
+
     class Meta:
         unique_together = ('site', 'group', 'key')
-    
+
