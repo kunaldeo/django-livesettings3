@@ -4,6 +4,11 @@ http://code.google.com/p/django-values/
 """
 from decimal import Decimal
 try:
+    from collections import OrderedDict as SortedDict
+except ImportError:
+    from django.utils.datastructures import SortedDict
+
+try:
     import json
 except ImportError:
     from django.utils import simplejson as json
@@ -11,7 +16,6 @@ except ImportError:
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, DatabaseError
-from django.utils.datastructures import SortedDict
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext, ugettext_lazy as _
