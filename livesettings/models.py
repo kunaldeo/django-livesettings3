@@ -1,7 +1,12 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, connection, DatabaseError
-from django.db.models import loading
+
+try:
+    from django.apps import apps
+except ImportError:
+    from django.db.models import loading as apps
+
 from django.utils.translation import ugettext_lazy as _
 from keyedcache import cache_key, cache_get, cache_set, NotCachedError
 from keyedcache.models import CachedObjectMixin
@@ -54,7 +59,12 @@ def find_setting(group, key, site=None):
             setting = cache_get(ck)
 
         except NotCachedError, nce:
-            if loading.app_cache_ready():
+            if hasattr(apps, 'ready'):
+                app_cache_ready = apps.ready
+            else:
+                app_cache_ready = apps.app_cache_ready()
+
+            if app_cache_ready:
                 try:
                     setting = Setting.objects.get(site__id__exact=siteid, key__exact=key, group__exact=group)
 
