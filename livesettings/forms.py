@@ -1,6 +1,6 @@
 from django import forms
-from livesettings import *
 import logging
+from livesettings.values import ConfigurationGroup
 
 log = logging.getLogger('configuration')
 
@@ -8,7 +8,7 @@ class SettingsEditor(forms.Form):
     "Base editor, from which customized forms are created"
 
     def __init__(self, *args, **kwargs):
-        settings = kwargs.pop('settings') 
+        settings = kwargs.pop('settings')
         super(SettingsEditor, self).__init__(*args, **kwargs)
         flattened = []
         groups = []
@@ -18,7 +18,7 @@ class SettingsEditor(forms.Form):
                     flattened.append(s)
             else:
                 flattened.append(setting)
-                    
+
         for setting in flattened:
             # Add the field to the customized field list
             kw = {
@@ -28,11 +28,11 @@ class SettingsEditor(forms.Form):
                 'initial': setting.editor_value
             }
             field = setting.make_field(**kw)
-            
+
             k = '%s__%s' % (setting.group.key, setting.key)
             self.fields[k] = field
             if not setting.group in groups:
                 groups.append(setting.group)
-            #log.debug("Added field: %s = %s" % (k, str(field)))
+            # log.debug("Added field: %s = %s" % (k, str(field)))
 
         self.groups = groups

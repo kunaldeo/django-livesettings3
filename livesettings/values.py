@@ -144,7 +144,7 @@ class Value(object):
         self.key = key
         self.description = kwargs.get('description', None)
         self.help_text = kwargs.get('help_text')
-        self.choices = kwargs.get('choices',[])
+        self.choices = kwargs.get('choices', [])
         self.ordering = kwargs.pop('ordering', 0)
         self.hidden = kwargs.pop('hidden', False)
         self.update_callback = kwargs.pop('update_callback', None)
@@ -198,7 +198,7 @@ class Value(object):
                 skip = True
                 break
         if not skip:
-            self.choices += (choice, )
+            self.choices += (choice,)
 
     def choice_field(self, **kwargs):
         if self.hidden:
@@ -274,7 +274,7 @@ class Value(object):
     def _setting(self):
         return find_setting(self.group.key, self.key)
 
-    setting = property(fget = _setting)
+    setting = property(fget=_setting)
 
     def _value(self):
         global is_setting_initializing
@@ -329,7 +329,7 @@ class Value(object):
                     import traceback
                     traceback.print_exc()
                     log.error("Problem finding settings %s.%s, %s", self.group.key, self.key, e)
-                    raise SettingNotSet("Startup error, couldn't load %s.%s" %(self.group.key, self.key))
+                    raise SettingNotSet("Startup error, couldn't load %s.%s" % (self.group.key, self.key))
             else:
                 is_setting_initializing = False
         return val
@@ -366,7 +366,7 @@ class Value(object):
 
                 return True
         else:
-            log.debug('not updating setting %s.%s - livesettings db is disabled',self.group.key, self.key)
+            log.debug('not updating setting %s.%s - livesettings db is disabled', self.group.key, self.key)
 
         return False
 
@@ -555,13 +555,13 @@ class PercentValue(Value):
                 value = Decimal(value)
             except:
                 raise forms.ValidationError('This value must be a decimal number.')
-            return unicode(Decimal(value)/100)
-        
+            return unicode(Decimal(value) / 100)
+
         class widget(forms.TextInput):
             def render(self, name, value, attrs=None):
                 # Place a percent sign after a smaller text field
                 try:
-                    value = unicode("%.2f" % (Decimal(value)*100))
+                    value = unicode("%.2f" % (Decimal(value) * 100))
                 except:
                     value = "N/A"
                 attrs['size'] = attrs['max_length'] = 6
@@ -718,7 +718,7 @@ class ModuleValue(Value):
 
     def to_python(self, value):
         if value in (NOTSET, ''):
-            v = {}    # TODO this was probably not a good idea
+            v = {}  # TODO this was probably not a good idea
         else:
             try:
                 v = load_module(value)

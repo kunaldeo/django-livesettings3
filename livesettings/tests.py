@@ -3,8 +3,15 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import keyedcache
 import livesettings
-from livesettings import *
 import logging
+from livesettings.values import IntegerValue, BASE_GROUP, StringValue, \
+    ConfigurationGroup, BooleanValue, MultipleStringValue, LongStringValue, \
+    PasswordValue, DecimalValue, DurationValue, FloatValue, PositiveIntegerValue, \
+    LongMultipleStringValue, ModuleValue
+from livesettings.functions import config_register, config_exists, \
+    config_register_list, config_get, ConfigurationSettings, config_add_choice, \
+    config_choice_values, config_value, config_get_group, config_collect_values
+from livesettings.models import SettingNotSet, LongSetting
 log = logging.getLogger('test');
 
 class ConfigurationFunctionTest(TestCase):
@@ -22,7 +29,7 @@ class ConfigurationFunctionTest(TestCase):
         self.assert_(config_exists(BASE_GROUP, 'testTwoB'))
 
     def testSetGroup(self):
-        g1 = ConfigurationGroup('test1','test1')
+        g1 = ConfigurationGroup('test1', 'test1')
         value = IntegerValue(g1, 'SingleGroupedItem')
         config_register(value)
         self.assertFalse(config_exists(BASE_GROUP, 'SingleGroupedItem'))
@@ -34,7 +41,7 @@ class ConfigurationTestSettings(TestCase):
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
-        g = ConfigurationGroup('test2','test2')
+        g = ConfigurationGroup('test2', 'test2')
         self.g = g
         config_register(StringValue(g, 's1'))
         config_register(IntegerValue(g, 's2', default=10))
@@ -99,7 +106,7 @@ class ConfigTestDotAccess(TestCase):
         # clear out cache from previous runs
         keyedcache.cache_delete()
 
-        g = ConfigurationGroup('test3','test3')
+        g = ConfigurationGroup('test3', 'test3')
         self.g = g
         c1 = config_register(BooleanValue(g, 's1', default=True))
         c2 = config_register(IntegerValue(g, 's2', default=10))
@@ -110,7 +117,7 @@ class ConfigTestDotAccess(TestCase):
         self.assertEqual(ConfigurationSettings().test3.s2.value, 100)
 
     def testSettingProperty(self):
-        c = config_get('test3','s2')
+        c = config_get('test3', 's2')
         s = c.setting
         self.assert_(s.value, 100)
 
@@ -123,7 +130,7 @@ class ConfigTestModuleValue(TestCase):
         # clear out cache from previous runs
         keyedcache.cache_delete()
 
-        g = ConfigurationGroup('modules','module test')
+        g = ConfigurationGroup('modules', 'module test')
         self.g = g
         self.c = config_register(ModuleValue(g, 'test'))
 
@@ -176,28 +183,28 @@ class TestMultipleValues(TestCase):
 
         self.g1c1 = config_register(MultipleStringValue(g1,
             'c1',
-            choices=((1,'one'),(2,'two'),(3,'three'))))
+            choices=((1, 'one'), (2, 'two'), (3, 'three'))))
 
     def testSave(self):
 
-        c = config_get('m1','c1')
-        c.update([1,2])
-        self.assertEqual(c.value, [1,2])
+        c = config_get('m1', 'c1')
+        c.update([1, 2])
+        self.assertEqual(c.value, [1, 2])
 
     def testAddChoice(self):
 
-        config_add_choice('m1','c1',(4, 'four'))
-        c = config_get('m1','c1')
-        self.assertEqual(c.choices, ((1,'one'),(2,'two'),(3,'three'),(4,'four')))
+        config_add_choice('m1', 'c1', (4, 'four'))
+        c = config_get('m1', 'c1')
+        self.assertEqual(c.choices, ((1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')))
 
     def testChoiceValues(self):
-        self.g1c1.update([1,2])
+        self.g1c1.update([1, 2])
 
-        self.assertEqual(self.g1c1.value, [1,2])
-        self.assertEqual(self.g1c1.choice_values, [(1, 'one'),(2, 'two')])
+        self.assertEqual(self.g1c1.value, [1, 2])
+        self.assertEqual(self.g1c1.choice_values, [(1, 'one'), (2, 'two')])
 
         choices = config_choice_values('m1', 'c1')
-        self.assertEqual(choices, [(1, 'one'),(2, 'two')])
+        self.assertEqual(choices, [(1, 'one'), (2, 'two')])
 
 class TestMultipleValuesWithDefault(TestCase):
 
@@ -210,16 +217,16 @@ class TestMultipleValuesWithDefault(TestCase):
 
         self.g1c1 = config_register(MultipleStringValue(g1,
             'c1',
-            choices=((1,'one'),(2,'two'),(3,'three')),
-            default=[1,2]))
+            choices=((1, 'one'), (2, 'two'), (3, 'three')),
+            default=[1, 2]))
 
     def testDefault(self):
 
-        c = config_get('mv2','c1')
-        self.assertEqual(c.value, [1,2])
+        c = config_get('mv2', 'c1')
+        self.assertEqual(c.value, [1, 2])
 
-        c.update([1,2,3])
-        self.assertEqual(c.value, [1,2,3])
+        c.update([1, 2, 3])
+        self.assertEqual(c.value, [1, 2, 3])
 
 class ConfigTestChoices(TestCase):
 
@@ -232,9 +239,9 @@ class ConfigTestChoices(TestCase):
         g1 = ConfigurationGroup('ctg1', 'Choice 1', ordering=1000)
         config_register(StringValue(g1, 'c1'))
 
-        c = config_get('ctg1','c1')
+        c = config_get('ctg1', 'c1')
 
-        self.assertEqual(c.choices, [('a','Item A'), ('b','Item B'), ('c','Item C')])
+        self.assertEqual(c.choices, [('a', 'Item A'), ('b', 'Item B'), ('c', 'Item C')])
 
 
 class ConfigTestRequires(TestCase):
@@ -263,9 +270,9 @@ class ConfigTestRequires(TestCase):
         self.assertTrue(v)
 
         keys = [cfg.key for cfg in self.g1]
-        self.assertEqual(keys, ['bool1', 'bool2', 'c2','c3'])
+        self.assertEqual(keys, ['bool1', 'bool2', 'c2', 'c3'])
 
-        c = config_get('req1','bool1')
+        c = config_get('req1', 'bool1')
         c.update(True)
 
         keys = [cfg.key for cfg in self.g1]
@@ -308,10 +315,10 @@ class ConfigTestRequiresChoices(TestCase):
 
         g = config_get_group('req2')
         keys = [cfg.key for cfg in g]
-        self.assertEqual(keys, ['c1','c3'])
+        self.assertEqual(keys, ['c1', 'c3'])
 
         c = config_get('BASE', 'rc1')
-        c.update(['c1','c2'])
+        c.update(['c1', 'c2'])
 
         g = config_get_group('req2')
         keys = [cfg.key for cfg in g]
@@ -353,7 +360,7 @@ class ConfigTestRequiresValue(TestCase):
         self.g2 = g2
 
         choices2 = config_register(StringValue(BASE_GROUP, 'valchoices2', ordering=1,
-            choices=(('a','test a'),('b', 'test b'),('c', 'test c'))))
+            choices=(('a', 'test a'), ('b', 'test b'), ('c', 'test c'))))
 
         self.g2c1 = config_register(IntegerValue(g2, 'c1', requires=choices2, requiresvalue='a', ordering=3))
         self.g2c2 = config_register(IntegerValue(g2, 'c2', requires=choices2, requiresvalue='b', ordering=4))
@@ -368,10 +375,10 @@ class ConfigTestRequiresValue(TestCase):
         g = config_get_group('reqval')
 
         keys = [cfg.key for cfg in g]
-        self.assertEqual(keys, ['c1','c3'])
+        self.assertEqual(keys, ['c1', 'c3'])
 
         c = config_get('BASE', 'valchoices')
-        c.update(['foo','bar'])
+        c.update(['foo', 'bar'])
 
         g = config_get_group('reqval')
         keys = [cfg.key for cfg in g]
@@ -443,7 +450,7 @@ class ConfigCollectGroup(TestCase):
         g2c1.update('set a')
         g3c1.update('set d')
 
-        choices.update(['coll1','coll3'])
+        choices.update(['coll1', 'coll3'])
 
     def testCollectSimple(self):
         v = config_collect_values('BASE', 'collect', 'test')
@@ -451,7 +458,7 @@ class ConfigCollectGroup(TestCase):
         self.assertEqual(v, ['set a', 'set d'])
 
     def testCollectUnique(self):
-        self.choices.update(['coll1','coll2','coll3'])
+        self.choices.update(['coll1', 'coll2', 'coll3'])
 
         v = config_collect_values('BASE', 'collect', 'test', unique=False)
 
@@ -471,7 +478,7 @@ class LongSettingTest(TestCase):
     def testLongStorage(self):
         w = config_value('BASE', 'LONG')
         self.assertEqual(len(w), 1000)
-        self.assertEqual(w, '*'*1000)
+        self.assertEqual(w, '*' * 1000)
 
     def testShortInLong(self):
         self.wide.update("test")
@@ -484,7 +491,7 @@ class LongSettingTest(TestCase):
         self.wide.update('woot')
 
         try:
-            q = LongSetting.objects.get(pk = remember)
+            q = LongSetting.objects.get(pk=remember)
             self.fail("Should be deleted")
         except LongSetting.DoesNotExist:
             pass
@@ -507,7 +514,7 @@ class OverrideTest(TestCase):
                 }
             }
 
-        g = ConfigurationGroup('overgroup','Override Group')
+        g = ConfigurationGroup('overgroup', 'Override Group')
         self.g = g
         config_register(StringValue(g, 's1'))
         config_register(IntegerValue(g, 's2', default=10))
@@ -579,7 +586,7 @@ class PermissionTest(TestCase):
         # usually login_url_mask % nexturl is '/accounts/login/?next=/settings/'
         login_url_mask = '%s?next=%%s' % reverse('django.contrib.auth.views.login')
         # unauthorized
-        response = self.client.get(reverse('satchmo_site_settings')) # usually '/settings/'
+        response = self.client.get(reverse('satchmo_site_settings'))  # usually '/settings/'
         self.assertRedirects(response, login_url_mask % '/settings/', msg_prefix='unathorized user should first login')
         # few authorized
         self.client.login(username='warehouseman', password='secret')
@@ -608,7 +615,7 @@ class PermissionTest(TestCase):
         response = self.client.get('/settings/export/')
         self.assertContains(response, "LIVESETTINGS_OPTIONS =", 1)
         self.assertContains(response, "'DB': False", 1)
-        self.assertContains(response, "u'BASE':",1)
+        self.assertContains(response, "u'BASE':", 1)
         self.assertContains(response, "u'ModifiedItem': u'6789'", 1)
 
     def test_secret_password(self):
@@ -643,7 +650,7 @@ class WebClientPostTest(TestCase):
         # no the same group name is used inside and outside the test.
         self.saved_conf_inst = ConfigurationSettings._ConfigurationSettings__instance.settings
         ConfigurationSettings.__dict__['_ConfigurationSettings__instance'].settings = SortedDict()
-        
+
         keyedcache.cache_delete()
         # set new users and values
         user = User.objects.create_user('admin', 'admin@example.com', 'secret')
@@ -673,7 +680,7 @@ class WebClientPostTest(TestCase):
         # because I do not want to display many old inconsistencies now. (hynekcer)
         def extract_val(content):
             regr = re.search(r'SingleItem.*value="([^"]*)"', content, flags=re.MULTILINE)
-            return regr and regr.group(1) or ''   # html value
+            return regr and regr.group(1) or ''  # html value
         def get_setting_like_in_db(x):
             try:
                 return x.setting.value
@@ -683,12 +690,12 @@ class WebClientPostTest(TestCase):
             "empty value can be accepted or rejected by validation rules"
             value = value_type(GROUP2, 'SingleItem')  # first it does it to easy get the class name
             type_name = value.__class__.__name__
-            value = value_type(GROUP2, 'SingleItem', description = 'type %s' % type_name)
+            value = value_type(GROUP2, 'SingleItem', description='type %s' % type_name)
             config_register(value)
             response = self.client.get('/settings/')
             html_value = extract_val(response.content)
-            #print '%s "%s"' % (type_name, html_value)
-            response = self.client.post('/settings/', {'Group2__SingleItem': ''}) # See in the traceback a line one level Up
+            # print '%s "%s"' % (type_name, html_value)
+            response = self.client.post('/settings/', {'Group2__SingleItem': ''})  # See in the traceback a line one level Up
             if reject_empty:
                 # option reject_empty had been tested before all Value types were fixed to be similar accepting empty value
                 # this is a typical text from validation warning
@@ -697,9 +704,9 @@ class WebClientPostTest(TestCase):
                 self.assertRedirects(response, '/settings/')
                 response = self.client.get('/settings/')
                 html_value = extract_val(response.content)
-                #print '%s "%s" "%s" "%s"' % (type_name, html_value, value.value, get_setting_like_in_db(value))
-                #self.assertNotContains(response, '&lt;object object at 0x[0-9a-f]+&gt;')  # rendered NOTSET = object()
-                #if re.search('SingleItem.*value="', response.content):
+                # print '%s "%s" "%s" "%s"' % (type_name, html_value, value.value, get_setting_like_in_db(value))
+                # self.assertNotContains(response, '&lt;object object at 0x[0-9a-f]+&gt;')  # rendered NOTSET = object()
+                # if re.search('SingleItem.*value="', response.content):
                 #    self.assertTrue(re.search('SingleItem.*value="([0.]*|\[\])"', response.content))
             protocol.add(value_type)
         #

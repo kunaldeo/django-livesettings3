@@ -5,7 +5,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.cache import never_cache
-from livesettings import ConfigurationSettings, forms
+from livesettings import forms
+from livesettings.functions import ConfigurationSettings
 from livesettings.overrides import get_overrides
 import logging
 
@@ -28,7 +29,7 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
 
     if use_db:
         # Create an editor customized for the current user
-        #editor = forms.customized_editor(settings)
+        # editor = forms.customized_editor(settings)
 
         if request.method == 'POST':
             # Populate the form with user-submitted data
@@ -47,7 +48,7 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
                 return HttpResponseRedirect(request.path)
         else:
             # Leave the form populated with current setting values
-            #form = editor()
+            # form = editor()
             form = forms.SettingsEditor(settings=settings)
     else:
         form = None
