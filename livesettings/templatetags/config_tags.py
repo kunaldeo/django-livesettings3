@@ -1,7 +1,7 @@
 from django import template
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
-from livesettings import config_value
+from livesettings.functions import config_value
 from livesettings.utils import url_join
 import logging
 
