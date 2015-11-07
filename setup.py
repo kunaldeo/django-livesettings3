@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
-VERSION = (1, 4, 15)
+VERSION = (1, 4, 16)
 
 # Dynamically calculate the version based on VERSION tuple
-if len(VERSION)>2 and VERSION[2] is not None:
+if len(VERSION) > 2 and VERSION[2] is not None:
     str_version = "%d.%d_%s" % VERSION[:3]
 else:
     str_version = "%d.%d" % VERSION[:2]
 
-version= str_version
+version = str_version
 
 setup(
     name = 'django-livesettings',
