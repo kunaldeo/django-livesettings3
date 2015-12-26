@@ -13,7 +13,8 @@ For this example, we will create a :file:`config.py` file in the 'test-project/l
 Example: "For this specific app, we want to allow an admin user to control how many images are displayed on the front page of our site."
 We will create the following :file:`config.py`::
 
-    from livesettings import config_register, ConfigurationGroup, PositiveIntegerValue, MultipleStringValue
+    from livesettings.functions import config_register
+    from livesettings.values import ConfigurationGroup, PositiveIntegerValue, MultipleStringValue
     from django.utils.translation import ugettext_lazy as _
 
     # First, setup a grup to hold all our possible configs
