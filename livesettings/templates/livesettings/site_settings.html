@@ -1,5 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static config_tags %}{% load url from future %}
+{% load staticfiles %}
 
 {% block extrahead %}{{ block.super }}
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
