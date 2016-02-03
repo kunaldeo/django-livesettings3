@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/kunaldeo/django-livesettings3.svg?branch=master)](https://travis-ci.org/kunaldeo/django-livesettings3)
+[![Build Status](https://travis-ci.org/kunaldeo/django-livesettings3.svg?branch=master)](https://travis-ci.org/kunaldeo/django-livesettings3) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3)
 About
 =====
 
