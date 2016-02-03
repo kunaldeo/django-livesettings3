@@ -50,7 +50,7 @@ def get_overrides(siteid=-1):
             siteid = _safe_get_siteid(None)
         
         opts = djangosettings.LIVESETTINGS_OPTIONS
-        if opts.has_key(siteid):
+        if siteid in opts:
             opts = opts[siteid]
             overrides = (opts.get('DB', True), opts['SETTINGS'])
 

@@ -3,6 +3,7 @@
 http://code.google.com/p/django-values/
 """
 from decimal import Decimal
+
 try:
     from collections import OrderedDict as SortedDict
 except ImportError:
@@ -24,18 +25,17 @@ from livesettings.overrides import get_overrides
 from livesettings.utils import load_module, is_string_like, is_list_or_tuple
 import datetime
 import logging
-import signals
+from . import signals
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
-      'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
-      'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue', 'PasswordValue']
+           'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
+           'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue', 'PasswordValue']
 
 _WARN = {}
 try:
     is_setting_initializing
 except:
     is_setting_initializing = True  # until the first success find "livesettings_setting" table, by any thread
-
 
 log = logging.getLogger('configuration')
 
@@ -44,6 +44,7 @@ log = logging.getLogger('configuration')
 # It is different from None or "" which are result of an empty field in the form.
 # It leads to to the existing more complicated code of Values classes, hopefully more robust.
 NOTSET = object()
+
 
 class SortedDotDict(object):
     def __init__(self, *args, **kwargs):
@@ -69,7 +70,7 @@ class SortedDotDict(object):
             raise AttributeError(key)
 
     def __iter__(self):
-        vals = self.values()
+        vals = list(self.values())
         for k in vals:
             yield k
 
@@ -83,25 +84,25 @@ class SortedDotDict(object):
         del self._dict[key]
 
     def keys(self):
-        return self._dict.keys()
+        return list(self._dict.keys())
 
     def values(self):
-        vals = self._dict.values()
+        vals = list(self._dict.values())
         vals = [v for v in vals if isinstance(v, (ConfigurationGroup, Value))]
         vals.sort()
         return vals
 
     def items(self):
-        return self._dict.items()
+        return list(self._dict.items())
 
     def iterkeys(self):
-        return self._dict.iterkeys()
+        return iter(self._dict.keys())
 
     def itervalues(self):
-        return self._dict.itervalues()
+        return iter(self._dict.values())
 
     def iteritems(self):
-        return self._dict.iteritems()
+        return iter(self._dict.items())
 
     def get(self, *args, **kwargs):
         return self._dict.get(*args, **kwargs)
@@ -141,6 +142,7 @@ class SortedDotDict(object):
 
 class ConfigurationGroup(SortedDotDict):
     """A simple wrapper for a group of configuration values"""
+
     def __init__(self, key, name, *args, **kwargs):
         """Create a new ConfigurationGroup.
 
@@ -167,8 +169,8 @@ class ConfigurationGroup(SortedDotDict):
 
         super(ConfigurationGroup, self).__init__(*args, **kwargs)
 
-    def __cmp__(self, other):
-        return cmp((self.ordering, self.name), (other.ordering, other.name))
+    def __lt__(self, other):
+        return (self.ordering, self.name) < (other.ordering, other.name)
 
     def __eq__(self, other):
         return (type(self) == type(other)
@@ -180,7 +182,7 @@ class ConfigurationGroup(SortedDotDict):
 
     def dict_values(self, load_modules=True):
         vals = {}
-        keys = super(ConfigurationGroup, self).keys()
+        keys = list(super(ConfigurationGroup, self).keys())
         for key in keys:
             v = self[key]
             if isinstance(v, Value):
@@ -191,13 +193,14 @@ class ConfigurationGroup(SortedDotDict):
         return vals
 
     def values(self):
-        vals = super(ConfigurationGroup, self).values()
+        vals = list(super(ConfigurationGroup, self).values())
         return [v for v in vals if v.enabled()]
+
 
 BASE_GROUP = ConfigurationGroup('BASE', _('Base Settings'), ordering=0)
 
-class Value(object):
 
+class Value(object):
     creation_counter = 0
 
     def __init__(self, group, key, **kwargs):
@@ -240,7 +243,7 @@ class Value(object):
             self.requires = group.requires
             self.requires_value = group.requires_value
 
-        if kwargs.has_key('default'):
+        if 'default' in kwargs:
             self.default = kwargs.pop('default')
             self.use_default = True
         else:
@@ -249,8 +252,11 @@ class Value(object):
         self.creation_counter = Value.creation_counter
         Value.creation_counter += 1
 
-    def __cmp__(self, other):
-        return cmp((self.ordering, self.description, self.creation_counter), (other.ordering, other.description, other.creation_counter))
+    def __lt__(self, other):
+        if self.description is None or other.description is None:
+            return (self.ordering, self.creation_counter) < (self.ordering, self.creation_counter)
+        return (self.ordering, self.description, self.creation_counter) < (
+            other.ordering, other.description, other.creation_counter)
 
     def __eq__(self, other):
         if type(self) == type(other):
@@ -262,7 +268,7 @@ class Value(object):
         return iter(self.value)
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
     def __str__(self):
         return str(self.value)
@@ -308,13 +314,13 @@ class Value(object):
                 for x in self.choices:
                     try:
                         if x[0] == self.default or x[0] in self.default:
-                            work.append('%s' % unicode(smart_str(x[1])))
+                            work.append('%s' % str(smart_str(x[1])))
                     except TypeError:
                         continue
                 note = gettext('Default value: ') + ", ".join(work)
 
             else:
-                note = _("Default value: %s") % unicode(self.default)
+                note = _("Default value: %s") % str(self.default)
 
         return note
 
@@ -375,28 +381,29 @@ class Value(object):
             try:
                 val = self.setting.value
 
-            except SettingNotSet, sns:
+            except SettingNotSet as sns:
                 is_setting_initializing = False
                 if self.use_default:
                     val = self.default
                     if overrides:
                         # maybe override the default
                         grp = overrides.get(self.group.key, {})
-                        if grp.has_key(self.key):
+                        if self.key in grp:
                             val = grp[self.key]
                 else:
                     val = NOTSET
 
-            except AttributeError, ae:
+            except AttributeError as ae:
                 is_setting_initializing = False
                 log.error("Attribute error: %s", ae)
                 log.error("%s: Could not get _value of %s", self.key, self.setting)
-                raise(ae)
+                raise (ae)
 
-            except Exception, e:
+            except Exception as e:
                 global _WARN
-                if is_setting_initializing and isinstance(e, DatabaseError) and str(e).find("livesettings_setting") > -1:
-                    if not _WARN.has_key('livesettings_setting'):
+                if is_setting_initializing and isinstance(e, DatabaseError) and str(e).find(
+                        "livesettings_setting") > -1:
+                    if 'livesettings_setting' not in _WARN:
                         log.warn(str(e).strip())
                         _WARN['livesettings_setting'] = True
                     log.warn('Error loading livesettings from table, OK if you are in syncdb or before it. ROLLBACK')
@@ -405,7 +412,8 @@ class Value(object):
                     if self.use_default:
                         val = self.default
                     else:
-                        raise ImproperlyConfigured("All settings used in startup must have defaults, %s.%s does not", self.group.key, self.key)
+                        raise ImproperlyConfigured("All settings used in startup must have defaults, %s.%s does not",
+                                                   self.group.key, self.key)
                 else:
                     is_setting_initializing = False
                     import traceback
@@ -425,7 +433,7 @@ class Value(object):
             new_value = self.to_python(value)
             if current_value != new_value:
                 if self.update_callback:
-                    new_value = apply(self.update_callback, (current_value, new_value))
+                    new_value = self.update_callback(*(current_value, new_value))
 
                 db_value = self.get_db_prep_save(new_value)
 
@@ -444,7 +452,8 @@ class Value(object):
                     log.info("Updated setting %s.%s = %s", self.group.key, self.key, value)
                     s.save()
 
-                signals.configuration_value_changed.send(self, old_value=current_value, new_value=new_value, setting=self)
+                signals.configuration_value_changed.send(self, old_value=current_value, new_value=new_value,
+                                                         setting=self)
 
                 return True
         else:
@@ -474,22 +483,21 @@ class Value(object):
         "Returns a value suitable for storage into a CharField"
         if value == NOTSET:
             value = ""
-        return unicode(value)
+        return str(value)
 
     def to_editor(self, value):
         "Returns a value suitable for display in a form widget"
         if value == NOTSET:
             return NOTSET  # TODO this was not a good idea for an editor: "<object object 0x123..>"
-        return unicode(value)
+        return str(value)
+
 
 ###############
 # VALUE TYPES #
 ###############
 
 class BooleanValue(Value):
-
     class field(forms.BooleanField):
-
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             forms.BooleanField.__init__(self, *args, **kwargs)
@@ -504,6 +512,7 @@ class BooleanValue(Value):
         return False
 
     to_editor = to_python
+
 
 class DecimalValue(Value):
     class field(forms.DecimalField):
@@ -525,7 +534,7 @@ class DecimalValue(Value):
 
         try:
             return Decimal(value)
-        except TypeError, te:
+        except TypeError as te:
             log.warning("Can't convert %s to Decimal for settings %s.%s", value, self.group.key, self.key)
             raise TypeError(te)
 
@@ -533,7 +542,8 @@ class DecimalValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return str(value)
+
 
 class DurationValue(Value):
     # DurationValue has a lot of duplication and ugliness because DurationField
@@ -571,10 +581,10 @@ class DurationValue(Value):
         if value == NOTSET:
             return NOTSET
         else:
-            return unicode(value.days * 24 * 3600 + value.seconds + float(value.microseconds) / 1000000)
+            return str(value.days * 24 * 3600 + value.seconds + float(value.microseconds) / 1000000)
+
 
 class FloatValue(Value):
-
     class field(forms.FloatField):
 
         def __init__(self, *args, **kwargs):
@@ -582,7 +592,7 @@ class FloatValue(Value):
             forms.FloatField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
-        if value in (NOTSET, None) :
+        if value in (NOTSET, None):
             value = 0
         return float(value)
 
@@ -590,7 +600,8 @@ class FloatValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return str(value)
+
 
 class IntegerValue(Value):
     class field(forms.IntegerField):
@@ -608,7 +619,7 @@ class IntegerValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return str(value)
 
 
 # Deprecated PercentValue does not work good and can not be fixed
@@ -616,7 +627,6 @@ class IntegerValue(Value):
 # It is better to Replace PercentValue(...) by DecimalValue(... min_value=0, max_value=100, max_decimal_places=2)
 # and easily divide result value by 100 in the user application.
 class PercentValue(Value):
-
     class field(forms.DecimalField):
 
         def __init__(self, *args, **kwargs):
@@ -637,13 +647,13 @@ class PercentValue(Value):
                 value = Decimal(value)
             except:
                 raise forms.ValidationError('This value must be a decimal number.')
-            return unicode(Decimal(value) / 100)
+            return str(Decimal(value) / 100)
 
         class widget(forms.TextInput):
             def render(self, name, value, attrs=None):
                 # Place a percent sign after a smaller text field
                 try:
-                    value = unicode("%.2f" % (Decimal(value) * 100))
+                    value = str("%.2f" % (Decimal(value) * 100))
                 except:
                     value = "N/A"
                 attrs['size'] = attrs['max_length'] = 6
@@ -658,14 +668,13 @@ class PercentValue(Value):
         if value == NOTSET:
             return "0"
         else:
-            return unicode(value)
+            return str(value)
 
 
 class PositiveIntegerValue(IntegerValue):
     """Non negative integer value. (positive or zero)."""
 
     class field(forms.IntegerField):
-
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             kwargs['min_value'] = 0
@@ -673,7 +682,6 @@ class PositiveIntegerValue(IntegerValue):
 
 
 class StringValue(Value):
-
     class field(forms.CharField):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
@@ -682,9 +690,10 @@ class StringValue(Value):
     def to_python(self, value):
         if value == NOTSET:
             value = ""
-        return unicode(value)
+        return str(value)
 
     to_editor = to_python
+
 
 class PasswordValue(StringValue):
     """
@@ -695,9 +704,11 @@ class PasswordValue(StringValue):
         render_value    Determines whether the widget will have a value filled in when the form is re-displayed (default is True).
                         If render_value=False, a password can be also completely deleted by writing space to the field.
     """
+
     # class field is dynamically assigned to the instance as FieldRender or FieldNoRender
     class FieldRender(forms.CharField):
         render_value = True
+
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             kwargs['widget'] = forms.PasswordInput(render_value=self.render_value)
@@ -709,7 +720,8 @@ class PasswordValue(StringValue):
     def __init__(self, *args, **kwargs):
         # prevent modifiyng of update_callback
         save_update_callback = self.update_callback
-        setattr(self, 'field', kwargs.pop('render_value', True) and PasswordValue.FieldRender or PasswordValue.FieldNoRender)
+        setattr(self, 'field',
+                kwargs.pop('render_value', True) and PasswordValue.FieldRender or PasswordValue.FieldNoRender)
         super(PasswordValue, self).__init__(*args, **kwargs)
         self.update_callback = save_update_callback
 
@@ -722,8 +734,8 @@ class PasswordValue(StringValue):
                 return ''
         return new_value
 
-class LongStringValue(Value):
 
+class LongStringValue(Value):
     class field(forms.CharField):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
@@ -737,12 +749,12 @@ class LongStringValue(Value):
     def to_python(self, value):
         if value == NOTSET:
             value = ""
-        return unicode(value)
+        return str(value)
 
     to_editor = to_python
 
-class MultipleStringValue(Value):
 
+class MultipleStringValue(Value):
     class field(forms.CharField):
 
         def __init__(self, *args, **kwargs):
@@ -773,13 +785,14 @@ class MultipleStringValue(Value):
                     log.warning('Could not decode returning empty list: %s', value)
                     return []
 
-
     to_editor = to_python
+
 
 class LongMultipleStringValue(MultipleStringValue):
     def make_setting(self, db_value):
         log.debug('new long setting %s.%s', self.group.key, self.key)
         return LongSetting(group=self.group.key, key=self.key, value=db_value)
+
 
 class ModuleValue(Value):
     """Handles setting modules, storing them as strings in the db."""
@@ -815,4 +828,3 @@ class ModuleValue(Value):
         if value == NOTSET:
             value = ""
         return value
-

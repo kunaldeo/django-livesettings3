@@ -27,7 +27,7 @@ class ConfigurationSettings(object):
             try:
                 return self[key]
             except:
-                raise AttributeError, key
+                raise AttributeError(key)
 
         def __iter__(self):
             for v in self.groups():
@@ -39,7 +39,7 @@ class ConfigurationSettings(object):
         def __contains__(self, key):
             try:
                 key = self._resolve_key(key)
-                return self.settings.has_key(key)
+                return key in self.settings
             except:
                 return False
 
@@ -72,7 +72,7 @@ class ConfigurationSettings(object):
 
         def groups(self):
             """Return ordered list"""
-            return self.settings.values()
+            return list(self.settings.values())
 
         def has_config(self, group, key):
             if isinstance(group, values.ConfigurationGroup):
@@ -87,7 +87,7 @@ class ConfigurationSettings(object):
         def preregister_choice(self, group, key, choice):
             """Setup a choice for a group/key which hasn't been instantiated yet."""
             k = (group, key)
-            if self.prereg.has_key(k):
+            if k in self.prereg:
                 self.prereg[k].append(choice)
             else:
                 self.prereg[k] = [choice]
@@ -101,7 +101,7 @@ class ConfigurationSettings(object):
             valuekey = value.key
 
             k = (groupkey, valuekey)
-            if self.prereg.has_key(k):
+            if k in self.prereg:
                 for choice in self.prereg[k]:
                     value.add_choice(choice)
 
@@ -136,7 +136,7 @@ class ConfigurationSettings(object):
         return setattr(self.__instance, attr, value)
 
     def __unicode__(self):
-        return u"ConfigurationSettings: " + unicode(self.groups())
+        return "ConfigurationSettings: " + str(self.groups())
 
 def config_exists(group, key):
     """Test to see if a setting has been registered"""
@@ -173,7 +173,7 @@ def config_collect_values(group, groupkey, key, unique=True, skip_missing=True):
     for g in groups:
         try:
             ret.append(config_value(g, key))
-        except KeyError, ke:
+        except KeyError as ke:
             if not skip_missing:
                 raise SettingNotSet('No config %s.%s' % (g, key))
 
@@ -215,7 +215,7 @@ def config_value_safe(group, key, default_value):
         raw = config_value(group, key)
     except SettingNotSet:
         pass
-    except ImportError, e:
+    except ImportError as e:
         log.warn("Error getting %s.%s, OK if you are in SyncDB.", group, key)
 
     return raw

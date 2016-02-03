@@ -37,7 +37,7 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
             form = forms.SettingsEditor(data, settings=settings)
             if form.is_valid():
                 form.full_clean()
-                for name, value in form.cleaned_data.items():
+                for name, value in list(form.cleaned_data.items()):
                     group, key = name.split('__')
                     cfg = mgr.get_config(group, key)
                     if cfg.update(value):

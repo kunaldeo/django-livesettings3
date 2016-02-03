@@ -23,13 +23,14 @@ except:
     is_site_initializing = True  # until the first success find "django_site" table, by any thread
     is_first_warn = True
 
+
 def _safe_get_siteid(site):
     global is_site_initializing, is_first_warn
     if not site:
         try:
             site = Site.objects.get_current()
             siteid = site.id
-        except Exception, e:
+        except Exception as e:
             if is_site_initializing and isinstance(e, DatabaseError) and str(e).find('django_site') > -1:
                 if is_first_warn:
                     log.warn(str(e).strip())
@@ -45,6 +46,7 @@ def _safe_get_siteid(site):
         siteid = site.id
     return siteid
 
+
 def find_setting(group, key, site=None):
     """Get a setting or longsetting by group and key, cache and return it."""
 
@@ -58,7 +60,7 @@ def find_setting(group, key, site=None):
         try:
             setting = cache_get(ck)
 
-        except NotCachedError, nce:
+        except NotCachedError as nce:
             if hasattr(apps, 'ready'):
                 app_cache_ready = apps.ready
             else:
@@ -80,7 +82,7 @@ def find_setting(group, key, site=None):
 
     else:
         grp = overrides.get(group, None)
-        if grp and grp.has_key(key):
+        if grp and key in grp:
             val = grp[key]
             setting = ImmutableSetting(key=key, group=group, value=val)
             log.debug('Returning overridden: %s', setting)
@@ -90,18 +92,20 @@ def find_setting(group, key, site=None):
 
     return setting
 
+
 class SettingNotSet(Exception):
     def __init__(self, k, cachekey=None):
         self.key = k
         self.cachekey = cachekey
         self.args = [self.key, self.cachekey]
 
+
 class SettingManager(models.Manager):
     def get_query_set(self):
         return self.get_queryset()
 
     def get_queryset(self):
-    	if hasattr(super(SettingManager, self), 'get_queryset'):
+        if hasattr(super(SettingManager, self), 'get_queryset'):
             all = super(SettingManager, self).get_queryset()
         else:
             all = super(SettingManager, self).get_query_set()
@@ -111,7 +115,6 @@ class SettingManager(models.Manager):
 
 
 class ImmutableSetting(object):
-
     def __init__(self, group="", key="", value="", site=1):
         self.site = site
         self.group = group
@@ -139,7 +142,7 @@ class Setting(models.Model, CachedObjectMixin):
 
     objects = SettingManager()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.id is not None
 
     def cache_key(self, *args, **kwargs):
@@ -168,13 +171,14 @@ class LongSettingManager(models.Manager):
         return self.get_queryset()
 
     def get_queryset(self):
-    	if hasattr(super(LongSettingManager, self), 'get_queryset'):
+        if hasattr(super(LongSettingManager, self), 'get_queryset'):
             all = super(LongSettingManager, self).get_queryset()
         else:
             all = super(LongSettingManager, self).get_query_set()
 
         siteid = _safe_get_siteid(None)
         return all.filter(site__id__exact=siteid)
+
 
 class LongSetting(models.Model, CachedObjectMixin):
     """A Setting which can handle more than 255 characters"""
@@ -185,7 +189,7 @@ class LongSetting(models.Model, CachedObjectMixin):
 
     objects = LongSettingManager()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.id is not None
 
     def cache_key(self, *args, **kwargs):
@@ -208,4 +212,3 @@ class LongSetting(models.Model, CachedObjectMixin):
 
     class Meta:
         unique_together = ('site', 'group', 'key')
-

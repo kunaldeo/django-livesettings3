@@ -1,0 +1,7 @@
+language: python
+python:
+  - "3.5.1"
+# command to install dependencies
+install: "python setup.py develop"
+# command to run tests
+script: ./travis_tests.sh

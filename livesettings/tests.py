@@ -12,32 +12,32 @@ from livesettings.functions import config_register, config_exists, \
     config_register_list, config_get, ConfigurationSettings, config_add_choice, \
     config_choice_values, config_value, config_get_group, config_collect_values
 from livesettings.models import SettingNotSet, LongSetting
+
 log = logging.getLogger('test');
 
-class ConfigurationFunctionTest(TestCase):
 
+class ConfigurationFunctionTest(TestCase):
     def testSetSingleConfigItem(self):
         value = IntegerValue(BASE_GROUP, 'SingleItem')
         config_register(value)
-        self.assert_(config_exists(BASE_GROUP, 'SingleItem'))
+        self.assertTrue(config_exists(BASE_GROUP, 'SingleItem'))
 
     def testSetTwoConfigItems(self):
         s = [IntegerValue(BASE_GROUP, 'testTwoA'), StringValue(BASE_GROUP, 'testTwoB')]
         config_register_list(*s)
 
-        self.assert_(config_exists(BASE_GROUP, 'testTwoA'))
-        self.assert_(config_exists(BASE_GROUP, 'testTwoB'))
+        self.assertTrue(config_exists(BASE_GROUP, 'testTwoA'))
+        self.assertTrue(config_exists(BASE_GROUP, 'testTwoB'))
 
     def testSetGroup(self):
         g1 = ConfigurationGroup('test1', 'test1')
         value = IntegerValue(g1, 'SingleGroupedItem')
         config_register(value)
         self.assertFalse(config_exists(BASE_GROUP, 'SingleGroupedItem'))
-        self.assert_(config_exists(g1, 'SingleGroupedItem'))
+        self.assertTrue(config_exists(g1, 'SingleGroupedItem'))
 
 
 class ConfigurationTestSettings(TestCase):
-
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
@@ -66,7 +66,7 @@ class ConfigurationTestSettings(TestCase):
         self.assertEqual(c.value, 'test1')
 
         # should be true, since it is an update
-        self.assert_(c.update('test2'))
+        self.assertTrue(c.update('test2'))
         self.assertEqual(c.value, 'test2')
 
     def testTwice(self):
@@ -77,13 +77,12 @@ class ConfigurationTestSettings(TestCase):
 
         self.assertFalse(c.update('test1'))
 
-
     def testDeletesDefault(self):
         c = config_get('test2', 's3')
         # false because it isn't saving a default value
         self.assertFalse(c.update(10))
 
-        self.assert_(c.update(20))
+        self.assertTrue(c.update(20))
         self.assertEqual(c.value, 20)
         try:
             s = c.setting
@@ -91,7 +90,7 @@ class ConfigurationTestSettings(TestCase):
             self.fail("Should have a setting now")
 
         # now delete and go back to no setting by setting the default
-        self.assert_(c.update(10))
+        self.assertTrue(c.update(10))
         self.assertEqual(c.value, 10)
 
         try:
@@ -113,17 +112,18 @@ class ConfigTestDotAccess(TestCase):
         c2.update(100)
 
     def testDotAccess(self):
-        self.assert_(ConfigurationSettings().test3.s1.value)
+        self.assertTrue(ConfigurationSettings().test3.s1.value)
         self.assertEqual(ConfigurationSettings().test3.s2.value, 100)
 
     def testSettingProperty(self):
         c = config_get('test3', 's2')
         s = c.setting
-        self.assert_(s.value, 100)
+        self.assertTrue(s.value, 100)
 
     def testDictValues(self):
         d = self.g.dict_values()
-        self.assertEqual(d, {'s1': True, 's2' : 100})
+        self.assertEqual(d, {'s1': True, 's2': 100})
+
 
 class ConfigTestModuleValue(TestCase):
     def setUp(self):
@@ -138,7 +138,8 @@ class ConfigTestModuleValue(TestCase):
         c = config_get('modules', 'test')
         c.update('django')
 
-        self.assert_(hasattr(self.c.value, 'get_version'))
+        self.assertTrue(hasattr(self.c.value, 'get_version'))
+
 
 class ConfigTestSortOrder(TestCase):
     def setUp(self):
@@ -173,7 +174,6 @@ class ConfigTestSortOrder(TestCase):
 
 
 class TestMultipleValues(TestCase):
-
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
@@ -182,17 +182,15 @@ class TestMultipleValues(TestCase):
         self.g1 = g1
 
         self.g1c1 = config_register(MultipleStringValue(g1,
-            'c1',
-            choices=((1, 'one'), (2, 'two'), (3, 'three'))))
+                                                        'c1',
+                                                        choices=((1, 'one'), (2, 'two'), (3, 'three'))))
 
     def testSave(self):
-
         c = config_get('m1', 'c1')
         c.update([1, 2])
         self.assertEqual(c.value, [1, 2])
 
     def testAddChoice(self):
-
         config_add_choice('m1', 'c1', (4, 'four'))
         c = config_get('m1', 'c1')
         self.assertEqual(c.choices, ((1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')))
@@ -206,8 +204,8 @@ class TestMultipleValues(TestCase):
         choices = config_choice_values('m1', 'c1')
         self.assertEqual(choices, [(1, 'one'), (2, 'two')])
 
-class TestMultipleValuesWithDefault(TestCase):
 
+class TestMultipleValuesWithDefault(TestCase):
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
@@ -216,20 +214,19 @@ class TestMultipleValuesWithDefault(TestCase):
         self.g1 = g1
 
         self.g1c1 = config_register(MultipleStringValue(g1,
-            'c1',
-            choices=((1, 'one'), (2, 'two'), (3, 'three')),
-            default=[1, 2]))
+                                                        'c1',
+                                                        choices=((1, 'one'), (2, 'two'), (3, 'three')),
+                                                        default=[1, 2]))
 
     def testDefault(self):
-
         c = config_get('mv2', 'c1')
         self.assertEqual(c.value, [1, 2])
 
         c.update([1, 2, 3])
         self.assertEqual(c.value, [1, 2, 3])
 
-class ConfigTestChoices(TestCase):
 
+class ConfigTestChoices(TestCase):
     def testAddPreregisteredChoice(self):
         """Test that we can register choices before the config is actually set up."""
         config_add_choice('ctg1', 'c1', ('a', 'Item A'))
@@ -245,7 +242,6 @@ class ConfigTestChoices(TestCase):
 
 
 class ConfigTestRequires(TestCase):
-
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
@@ -265,7 +261,6 @@ class ConfigTestRequires(TestCase):
         bool2.update(True)
 
     def testSimpleRequires(self):
-
         v = config_value('req1', 'bool2')
         self.assertTrue(v)
 
@@ -278,8 +273,8 @@ class ConfigTestRequires(TestCase):
         keys = [cfg.key for cfg in self.g1]
         self.assertEqual(keys, ['bool1', 'bool2', 'c1', 'c2', 'c3'])
 
-class ConfigTestRequiresChoices(TestCase):
 
+class ConfigTestRequiresChoices(TestCase):
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
@@ -309,9 +304,8 @@ class ConfigTestRequiresChoices(TestCase):
         choices2.update('c1')
 
     def testSimpleRequiresChoices(self):
-
         v = config_value('BASE', 'rc1')
-        self.assertEquals(v, ['c1'])
+        self.assertEqual(v, ['c1'])
 
         g = config_get_group('req2')
         keys = [cfg.key for cfg in g]
@@ -326,7 +320,7 @@ class ConfigTestRequiresChoices(TestCase):
 
     def testRequiresSingleValue(self):
         v = config_value('BASE', 'choices2')
-        self.assertEquals(v, 'c1')
+        self.assertEqual(v, 'c1')
 
         keys = [cfg.key for cfg in self.g2]
         self.assertEqual(keys, ['c1'])
@@ -337,8 +331,8 @@ class ConfigTestRequiresChoices(TestCase):
         keys = [cfg.key for cfg in self.g2]
         self.assertEqual(keys, ['c2'])
 
-class ConfigTestRequiresValue(TestCase):
 
+class ConfigTestRequiresValue(TestCase):
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
@@ -360,7 +354,7 @@ class ConfigTestRequiresValue(TestCase):
         self.g2 = g2
 
         choices2 = config_register(StringValue(BASE_GROUP, 'valchoices2', ordering=1,
-            choices=(('a', 'test a'), ('b', 'test b'), ('c', 'test c'))))
+                                               choices=(('a', 'test a'), ('b', 'test b'), ('c', 'test c'))))
 
         self.g2c1 = config_register(IntegerValue(g2, 'c1', requires=choices2, requiresvalue='a', ordering=3))
         self.g2c2 = config_register(IntegerValue(g2, 'c2', requires=choices2, requiresvalue='b', ordering=4))
@@ -370,7 +364,7 @@ class ConfigTestRequiresValue(TestCase):
 
     def testRequiresValue(self):
         v = config_value('BASE', 'valchoices')
-        self.assertEquals(v, ['foo'])
+        self.assertEqual(v, ['foo'])
 
         g = config_get_group('reqval')
 
@@ -386,7 +380,7 @@ class ConfigTestRequiresValue(TestCase):
 
     def testRequiresSingleValue(self):
         v = config_value('BASE', 'valchoices2')
-        self.assertEquals(v, 'a')
+        self.assertEqual(v, 'a')
 
         keys = [cfg.key for cfg in self.g2]
         self.assertEqual(keys, ['c1'])
@@ -396,6 +390,7 @@ class ConfigTestRequiresValue(TestCase):
 
         keys = [cfg.key for cfg in self.g2]
         self.assertEqual(keys, ['c2'])
+
 
 class ConfigTestGroupRequires(TestCase):
     def setUp(self):
@@ -414,7 +409,7 @@ class ConfigTestGroupRequires(TestCase):
 
     def testRequiresValue(self):
         c = config_get('BASE', 'groupchoice')
-        self.assertEquals(c.value, [])
+        self.assertEqual(c.value, [])
 
         keys = [cfg.key for cfg in self.g1]
         self.assertEqual(keys, [])
@@ -429,6 +424,7 @@ class ConfigTestGroupRequires(TestCase):
 
         keys = [cfg.key for cfg in self.g1]
         self.assertEqual(keys, ['c1', 'c2', 'c3'])
+
 
 class ConfigCollectGroup(TestCase):
     def setUp(self):
@@ -468,6 +464,7 @@ class ConfigCollectGroup(TestCase):
 
         self.assertEqual(v, ['set a', 'set d'])
 
+
 class LongSettingTest(TestCase):
     def setUp(self):
         keyedcache.cache_delete()
@@ -496,23 +493,25 @@ class LongSettingTest(TestCase):
         except LongSetting.DoesNotExist:
             pass
 
+
 class OverrideTest(TestCase):
     """Test settings overrides"""
+
     def setUp(self):
         # clear out cache from previous runs
         keyedcache.cache_delete()
 
         djangosettings.LIVESETTINGS_OPTIONS = {
-            1 : {
-                'DB' : False,
-                'SETTINGS' : {
-                        'overgroup' : {
-                            's2' : '100',
-                            'choices' : '["one","two","three"]'
-                        }
+            1: {
+                'DB': False,
+                'SETTINGS': {
+                    'overgroup': {
+                        's2': '100',
+                        'choices': '["one","two","three"]'
                     }
                 }
             }
+        }
 
         g = ConfigurationGroup('overgroup', 'Override Group')
         self.g = g
@@ -527,7 +526,7 @@ class OverrideTest(TestCase):
     def testOverriddenSetting(self):
         """Accessing an overridden setting should give the override value."""
         c = config_get('overgroup', 's2')
-        self.assertEquals(c.value, 100)
+        self.assertEqual(c.value, 100)
 
     def testCantChangeSetting(self):
         """When overridden, setting a value should not work, should get the overridden value"""
@@ -535,13 +534,13 @@ class OverrideTest(TestCase):
         c.update(1)
 
         c = config_get('overgroup', 's2')
-        self.assertEquals(c.value, 100)
+        self.assertEqual(c.value, 100)
 
     def testNotOverriddenSetting(self):
         """Settings which are not overridden should return their defaults"""
         c = config_get('overgroup', 's3')
 
-        self.assertEquals(c.value, 10)
+        self.assertEqual(c.value, 10)
 
     def testOverriddenListSetting(self):
         """Make sure lists work when overridden"""
@@ -570,7 +569,8 @@ class PermissionTest(TestCase):
         user2 = User.objects.create_user('cautious_developer', 'fred@example.com', 'secret')
         user2.is_staff = True
         user2.user_permissions.add(Permission.objects.get(codename='change_setting', \
-                content_type=ContentType.objects.get(app_label='livesettings', model='setting')))
+                                                          content_type=ContentType.objects.get(app_label='livesettings',
+                                                                                               model='setting')))
         user2.save()
         # superuser
         user3 = User.objects.create_user('superuser', 'paul@example.com', 'secret')
@@ -591,11 +591,13 @@ class PermissionTest(TestCase):
         # few authorized
         self.client.login(username='warehouseman', password='secret')
         response = self.client.get(reverse('satchmo_site_settings'))
-        self.assertRedirects(response, login_url_mask % '/settings/', msg_prefix='user with small permission should not read normal settings')
+        self.assertRedirects(response, login_url_mask % '/settings/',
+                             msg_prefix='user with small permission should not read normal settings')
         # authorized enough but not for secret values
         self.client.login(username='cautious_developer', password='secret')
         response = self.client.get(reverse('settings_export'))  # usually '/settings/export/'
-        self.assertRedirects(response, login_url_mask % '/settings/export/', msg_prefix='user without superuser permission should not export sensitive settings')
+        self.assertRedirects(response, login_url_mask % '/settings/export/',
+                             msg_prefix='user without superuser permission should not export sensitive settings')
 
     def test_authorized_enough(self):
         "Testing a sufficiently authorized user"
@@ -615,8 +617,8 @@ class PermissionTest(TestCase):
         response = self.client.get('/settings/export/')
         self.assertContains(response, "LIVESETTINGS_OPTIONS =", 1)
         self.assertContains(response, "'DB': False", 1)
-        self.assertContains(response, "u'BASE':", 1)
-        self.assertContains(response, "u'ModifiedItem': u'6789'", 1)
+        self.assertContains(response, "'BASE':", 1)
+        self.assertContains(response, "'ModifiedItem': '6789'", 1)
 
     def test_secret_password(self):
         "Verify that password is saved but not re-echoed if render_value=False"
@@ -645,11 +647,11 @@ class WebClientPostTest(TestCase):
 
     def setUp(self):
         from django.contrib.auth.models import User
-        from django.utils.datastructures import SortedDict
+        from collections import OrderedDict
         # The following hack works like completely replaced ConfigurationSettings internal state only, if
         # no the same group name is used inside and outside the test.
         self.saved_conf_inst = ConfigurationSettings._ConfigurationSettings__instance.settings
-        ConfigurationSettings.__dict__['_ConfigurationSettings__instance'].settings = SortedDict()
+        ConfigurationSettings.__dict__['_ConfigurationSettings__instance'].settings = OrderedDict()
 
         keyedcache.cache_delete()
         # set new users and values
@@ -669,23 +671,26 @@ class WebClientPostTest(TestCase):
         "Tests of POST, verify is saved"
         response = self.client.post('/settings/', {'Group2__SingleItem': '7890'})
         # test can not use assertRedirects because it would consume the next get
-        self.assertEqual((response.status_code, response.get('Location', '')), (302, 'http://testserver/settings/'))
+        self.assertEqual((response.status_code, response.get('Location', '')), (302, '/settings/'))
         response = self.client.get('/settings/')
         self.assertContains(response, 'Updated')
         self.assertContains(response, '7890')
 
     def test_empty_fields(self):
         "test an empty value in the form should not raise an exception"
+
         # Some test features had been temporary commented out before some ..Values classes are fixed
         # because I do not want to display many old inconsistencies now. (hynekcer)
         def extract_val(content):
-            regr = re.search(r'SingleItem.*value="([^"]*)"', content, flags=re.MULTILINE)
+            regr = re.search(b'SingleItem.*value="([^"]*)"', content, flags=re.MULTILINE)
             return regr and regr.group(1) or ''  # html value
+
         def get_setting_like_in_db(x):
             try:
                 return x.setting.value
             except SettingNotSet:
                 return 'Error'
+
         def test_empty_value_type(value_type, protocol, reject_empty=False):
             "empty value can be accepted or rejected by validation rules"
             value = value_type(GROUP2, 'SingleItem')  # first it does it to easy get the class name
@@ -695,7 +700,8 @@ class WebClientPostTest(TestCase):
             response = self.client.get('/settings/')
             html_value = extract_val(response.content)
             # print '%s "%s"' % (type_name, html_value)
-            response = self.client.post('/settings/', {'Group2__SingleItem': ''})  # See in the traceback a line one level Up
+            response = self.client.post('/settings/',
+                                        {'Group2__SingleItem': ''})  # See in the traceback a line one level Up
             if reject_empty:
                 # option reject_empty had been tested before all Value types were fixed to be similar accepting empty value
                 # this is a typical text from validation warning
@@ -709,6 +715,7 @@ class WebClientPostTest(TestCase):
                 # if re.search('SingleItem.*value="', response.content):
                 #    self.assertTrue(re.search('SingleItem.*value="([0.]*|\[\])"', response.content))
             protocol.add(value_type)
+
         #
         import re
         GROUP2 = ConfigurationGroup('Group2', 'g')
@@ -728,20 +735,21 @@ class WebClientPostTest(TestCase):
         test_empty_value_type(PasswordValue, protocol)
         # verify completness of the test
         classes_to_test = set(getattr(livesettings.values, k) for k in livesettings.values.__all__ if \
-                not k in ('BASE_GROUP', 'ConfigurationGroup', 'Value', 'SortedDotDict', 'PercentValue'))
-        self.assertEqual(protocol, classes_to_test, msg='The tested classes have been not all exactly the same as expected')
+                              not k in ('BASE_GROUP', 'ConfigurationGroup', 'Value', 'SortedDotDict', 'PercentValue'))
+        self.assertEqual(protocol, classes_to_test,
+                         msg='The tested classes have been not all exactly the same as expected')
 
     def test_csrf(self):
         "test CSRF"
         from django.test import Client
         csrf_client = Client(enforce_csrf_checks=True)
         csrf_client.login(username='admin', password='secret')
-        # get CSFR token
         response = csrf_client.get('/settings/')
-        csrfmiddlewaretoken = response.context['csrf_token'] + ''
+        csrfmiddlewaretoken = str(response.context['csrf_token']) + ''
         self.assertContains(response, csrfmiddlewaretoken, msg_prefix='has not csrf')
         # expect OK
-        response = csrf_client.post('/settings/', {'Group2__SingleItem': '1234', 'csrfmiddlewaretoken': csrfmiddlewaretoken})
+        response = csrf_client.post('/settings/',
+                                    {'Group2__SingleItem': '1234', 'csrfmiddlewaretoken': csrfmiddlewaretoken})
         self.assertRedirects(response, expected_url='/settings/')
         # expect 403
         response = csrf_client.post('/settings/', {'Group2__SingleItem': '1234'})

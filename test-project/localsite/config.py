@@ -1,7 +1,7 @@
 """Examples for livesettings"""
 
 from livesettings.values import *
-from livesettings import config_register, config_register_list
+from livesettings.functions import config_register, config_register_list, config_get
 from django.utils.translation import ugettext_lazy as _
 
 # Default values should be specified explicitely, otherwise it would be
@@ -62,7 +62,7 @@ config_register_list(
     # Combobox - String value with choices
     StringValue( GR1_BOX, 'my_StringValue_combobox', description='Combobox', ordering=4,
          help_text='String value with choices',
-         default=u'AUTO',
+         default='AUTO',
          choices=(('ELEPHANT', _('Elephant')), ('ANT', _('Ant')), ('AUTO', _('Autodetect')),)),
 
     # Listbox with multiple selection - MultipleStringValue with choices
@@ -147,7 +147,7 @@ config_register_list(
 
     StringValue(GR_MY_CONDITIONAL, 'first_day', description='Calendar - First day of week', default='Monday',
         ordering=1,
-        choices=zip(* 2 * (('Sunday', 'Monday'),)),
+        choices=list(zip(* 2 * (('Sunday', 'Monday'),))),
         requires=MY_CONDITIONAL_SWITCHES,
         requiresvalue='calendar',
         help_text = 'Visibility of this field depends on selecting the item "Calendar" above.'
@@ -179,7 +179,7 @@ config_register_list(
     ModuleValue(MY_FIRST_OPTIONAL_GROUP, 'MODULE', default='django.contrib.webdesign.lorem_ipsum', hidden=True),
 
     MultipleStringValue(MY_FIRST_OPTIONAL_GROUP, 'lorem_words', description='Random words',
-        choices= zip(* 2 * ('lorem ipsum dolor sit amet'.split(),)),
+        choices= list(zip(* 2 * ('lorem ipsum dolor sit amet'.split(),))),
         help_text = 'Visibility of this group depends on selecting the item "Random text module" above.',
     )
 )

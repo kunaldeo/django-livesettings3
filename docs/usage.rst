@@ -159,6 +159,6 @@ Next Steps
 The rest of the various livesettings types can be used in a similar manner. You can review the `satchmo code <https://bitbucket.org/chris1610/satchmo/src>`_ for more advanced examples.
 
 
-.. _`Django-Keyedcache`: http://bitbucket.org/bkroeze/django-keyedcache/
+.. _`Django-Keyedcache3`: https://github.com/kunaldeo/django-keyedcache3
 .. _`Satchmo Project`: http://www.satchmoproject.com
 .. _`pip`: http://pypi.python.org/pypi/pip
