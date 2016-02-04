@@ -1,6 +1,12 @@
 import logging
 
+import keyedcache
+
 import livesettings
+from django.conf import settings as djangosettings
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+from django.test.utils import override_settings
 from livesettings.functions import config_register, config_exists, \
     config_register_list, config_get, ConfigurationSettings, config_add_choice, \
     config_choice_values, config_value, config_get_group, config_collect_values
@@ -9,11 +15,6 @@ from livesettings.values import IntegerValue, BASE_GROUP, StringValue, \
     ConfigurationGroup, BooleanValue, MultipleStringValue, LongStringValue, \
     PasswordValue, DecimalValue, DurationValue, FloatValue, PositiveIntegerValue, \
     LongMultipleStringValue, ModuleValue
-
-import keyedcache
-from django.conf import settings as djangosettings
-from django.core.urlresolvers import reverse
-from django.test import TestCase
 
 log = logging.getLogger('test');
 
@@ -555,9 +556,9 @@ class OverrideTest(TestCase):
         self.assertEqual(v[2], "three")
 
 
+@override_settings(ROOT_URLCONF='livesettings.test_urls')
 class PermissionTest(TestCase):
     """Test access permissions"""
-    urls = 'livesettings.test_urls'
 
     def setUp(self):
         from django.contrib.auth.models import Permission, User
@@ -586,7 +587,7 @@ class PermissionTest(TestCase):
     def test_unauthorized_form(self):
         "Testing users without enought additional permission"
         # usually login_url_mask % nexturl is '/accounts/login/?next=/settings/'
-        login_url_mask = '%s?next=%%s' % reverse('django.contrib.auth.views.login')
+        login_url_mask = '%s?next=%%s' % reverse('loginview')
         # unauthorized
         response = self.client.get(reverse('satchmo_site_settings'))  # usually '/settings/'
         self.assertRedirects(response, login_url_mask % '/settings/', msg_prefix='unathorized user should first login')
@@ -639,13 +640,13 @@ class PermissionTest(TestCase):
         self.assertContains(response, 'unsecure_pwd')
 
 
+@override_settings(ROOT_URLCONF='livesettings.test_urls')
 class WebClientPostTest(TestCase):
     """
     Tests of the web interface with POST.
     These tests require temporary removing all earlier defined values.
     Then are all values restored because it can be important for testing an application which uses livesettings.
     """
-    urls = 'livesettings.test_urls'
 
     def setUp(self):
         from django.contrib.auth.models import User

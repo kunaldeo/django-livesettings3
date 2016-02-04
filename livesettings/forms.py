@@ -1,8 +1,7 @@
 import logging
 
-from livesettings.values import ConfigurationGroup
-
 from django import forms
+from livesettings.values import ConfigurationGroup
 
 log = logging.getLogger('configuration')
 

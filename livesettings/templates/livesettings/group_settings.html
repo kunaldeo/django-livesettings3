@@ -38,6 +38,7 @@
             <form method="post"> {% csrf_token %}
                 <div class="module">
                     <table summary="
+
                             {% filter capfirst %}{% blocktrans with group.name as name %}Settings included in {{ name }}.{% endblocktrans %}{% endfilter %}"
                            width="100%">
                         {% for field in form %}

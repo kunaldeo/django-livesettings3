@@ -1,11 +1,10 @@
 import logging
 
-from livesettings.functions import config_value
-from livesettings.utils import url_join
-
 from django import template
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
+from livesettings.functions import config_value
+from livesettings.utils import url_join
 
 log = logging.getLogger('configuration.config_tags')
 

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-livesettings3',
-    version='1.4.17',
+    version='1.4.18',
     description="Python 3 port of django-livesettings",
     long_description="""Python 3 version of django live settings. It provides the ability to configure settings via an admin interface, rather than by editing "settings.py".""",
     author='Kunal Deo',

@@ -1,10 +1,9 @@
 import logging
 
+from django.utils.translation import ugettext
 from livesettings import values
 from livesettings.models import SettingNotSet
 from livesettings.utils import is_string_like
-
-from django.utils.translation import ugettext
 
 log = logging.getLogger('configuration')
 

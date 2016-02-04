@@ -1,9 +1,8 @@
 """Examples for livesettings"""
 
+from django.utils.translation import ugettext_lazy as _
 from livesettings.functions import config_register, config_register_list, config_get
 from livesettings.values import *
-
-from django.utils.translation import ugettext_lazy as _
 
 # Default values should be specified explicitely, otherwise it would be
 # an error if nothing is saved in the database and no default is found.
@@ -159,9 +158,7 @@ config_register_list(
 # and can be completely removed. That only removes some one conditional group and its
 # choice in MY_CONDITIONAL_SWITCHES.
 
-from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
-from livesettings import *
 
 # add a new choice to main choises where this module can be enabled
 MY_CONDITIONAL_SWITCHES = config_get('MY_CONDITIONAL', 'MODULES')

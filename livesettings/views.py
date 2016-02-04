@@ -1,16 +1,14 @@
 import logging
 
-from livesettings import forms
-from livesettings.functions import ConfigurationSettings
-from livesettings.overrides import get_overrides
-
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
+from livesettings import forms
+from livesettings.functions import ConfigurationSettings
+from livesettings.overrides import get_overrides
 
 log = logging.getLogger('livesettings.views')
 
@@ -55,12 +53,12 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
     else:
         form = None
 
-    return render_to_response(template, {
+    return render(request, template, {
         'title': title,
         'group': group,
         'form': form,
         'use_db': use_db,
-    }, context_instance=RequestContext(request))
+    })
 
 
 group_settings = never_cache(permission_required('livesettings.change_setting')(group_settings))
@@ -90,7 +88,7 @@ def export_as_python(request):
     pp = pprint.PrettyPrinter(indent=4)
     pretty = pp.pformat(work)
 
-    return render_to_response('livesettings/text.txt', {'text': pretty}, content_type='text/plain')
+    return render(request, 'livesettings/text.txt', {'text': pretty}, content_type='text/plain')
 
 
 # Required permission `is_superuser` is equivalent to auth.change_user,

@@ -1,6 +1,5 @@
-from livesettings.functions import config_value
-
 from django.shortcuts import render_to_response
+from livesettings.functions import config_value
 
 
 def index(request):
