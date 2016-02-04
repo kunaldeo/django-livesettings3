@@ -1,16 +1,19 @@
+import logging
+
+from livesettings import forms
+from livesettings.functions import ConfigurationSettings
+from livesettings.overrides import get_overrides
+
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.cache import never_cache
-from livesettings import forms
-from livesettings.functions import ConfigurationSettings
-from livesettings.overrides import get_overrides
-import logging
+from django.views.decorators.csrf import csrf_protect
 
 log = logging.getLogger('livesettings.views')
+
 
 @csrf_protect
 def group_settings(request, group, template='livesettings/group_settings.html'):
@@ -41,7 +44,6 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
                     group, key = name.split('__')
                     cfg = mgr.get_config(group, key)
                     if cfg.update(value):
-
                         # Give user feedback as to which settings were changed
                         messages.add_message(request, messages.INFO, 'Updated %s on %s' % (cfg.key, cfg.group.key))
 
@@ -55,16 +57,20 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
 
     return render_to_response(template, {
         'title': title,
-        'group' : group,
+        'group': group,
         'form': form,
-        'use_db' : use_db,
+        'use_db': use_db,
     }, context_instance=RequestContext(request))
+
+
 group_settings = never_cache(permission_required('livesettings.change_setting')(group_settings))
+
 
 # Site-wide setting editor is identical, but without a group
 # permission_required is implied, since it calls group_settings
 def site_settings(request):
     return group_settings(request, group=None, template='livesettings/site_settings.html')
+
 
 def export_as_python(request):
     """Export site settings as a dictionary of dictionaries"""
@@ -77,14 +83,15 @@ def export_as_python(request):
     both.extend(list(LongSetting.objects.all()))
 
     for s in both:
-        sitesettings = work.setdefault(s.site.id, {'DB': False, 'SETTINGS':{}})['SETTINGS']
+        sitesettings = work.setdefault(s.site.id, {'DB': False, 'SETTINGS': {}})['SETTINGS']
         sitegroup = sitesettings.setdefault(s.group, {})
         sitegroup[s.key] = s.value
 
     pp = pprint.PrettyPrinter(indent=4)
     pretty = pp.pformat(work)
 
-    return render_to_response('livesettings/text.txt', { 'text' : pretty }, content_type='text/plain')
+    return render_to_response('livesettings/text.txt', {'text': pretty}, content_type='text/plain')
+
 
 # Required permission `is_superuser` is equivalent to auth.change_user,
 # because who can modify users, can easy became a superuser.

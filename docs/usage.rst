@@ -103,11 +103,11 @@ The same permission is needed to view the form and submit.
 Permissions for insert or delete and any permissions for "long setting" are ignored.
 
 .. Note::
-    Superusers will have access to this setting without enabling any specific permissions.
+Superusers will have access to this setting without enabling any specific permissions.
 
 
 .. Note::
-    Because of the security significance of livesettings, all views in livesettings support CSRF regardless of whether or not the 
+Because of the security significance of livesettings, all views in livesettings support CSRF regardless of whether or not the
     CsrfViewMiddleware is enabled or disabled.
 
 If you want to save a sensitive information to livesettings on production site (e.g. a password for logging into other web service)

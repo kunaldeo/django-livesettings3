@@ -8,8 +8,8 @@ Requirements
  * `Django`_ 1.8+
  * `Django-Keyedcache3`_
 
-.. Note 
-    It is recommended you use `pip`_ for the install process.
+.. Note
+It is recommended you use `pip`_ for the install process.
 
 
 Installing Livesettings

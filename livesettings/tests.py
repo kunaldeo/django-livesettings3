@@ -1,17 +1,19 @@
-from django.conf import settings as djangosettings
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-import keyedcache
-import livesettings
 import logging
-from livesettings.values import IntegerValue, BASE_GROUP, StringValue, \
-    ConfigurationGroup, BooleanValue, MultipleStringValue, LongStringValue, \
-    PasswordValue, DecimalValue, DurationValue, FloatValue, PositiveIntegerValue, \
-    LongMultipleStringValue, ModuleValue
+
+import livesettings
 from livesettings.functions import config_register, config_exists, \
     config_register_list, config_get, ConfigurationSettings, config_add_choice, \
     config_choice_values, config_value, config_get_group, config_collect_values
 from livesettings.models import SettingNotSet, LongSetting
+from livesettings.values import IntegerValue, BASE_GROUP, StringValue, \
+    ConfigurationGroup, BooleanValue, MultipleStringValue, LongStringValue, \
+    PasswordValue, DecimalValue, DurationValue, FloatValue, PositiveIntegerValue, \
+    LongMultipleStringValue, ModuleValue
+
+import keyedcache
+from django.conf import settings as djangosettings
+from django.core.urlresolvers import reverse
+from django.test import TestCase
 
 log = logging.getLogger('test');
 

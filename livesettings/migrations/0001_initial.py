@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
 import keyedcache.models
+from django.db import models, migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('sites', '0001_initial'),
     ]

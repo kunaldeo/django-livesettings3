@@ -1,8 +1,11 @@
-from django import forms
 import logging
+
 from livesettings.values import ConfigurationGroup
 
+from django import forms
+
 log = logging.getLogger('configuration')
+
 
 class SettingsEditor(forms.Form):
     "Base editor, from which customized forms are created"
@@ -33,6 +36,6 @@ class SettingsEditor(forms.Form):
             self.fields[k] = field
             if not setting.group in groups:
                 groups.append(setting.group)
-            # log.debug("Added field: %s = %s" % (k, str(field)))
+                # log.debug("Added field: %s = %s" % (k, str(field)))
 
         self.groups = groups

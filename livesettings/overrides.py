@@ -4,9 +4,9 @@ for settings retrieval.
 
 from django.conf import settings as djangosettings
 from django.contrib.sites.models import Site
-import logging
 
 __all__ = ['get_overrides']
+
 
 def _safe_get_siteid(site):
     if not site:
@@ -18,6 +18,7 @@ def _safe_get_siteid(site):
     else:
         siteid = site.id
     return siteid
+
 
 def get_overrides(siteid=-1):
     """Check to see if livesettings is allowed to use the database.  If not, then
@@ -48,7 +49,7 @@ def get_overrides(siteid=-1):
     if hasattr(djangosettings, 'LIVESETTINGS_OPTIONS'):
         if siteid == -1:
             siteid = _safe_get_siteid(None)
-        
+
         opts = djangosettings.LIVESETTINGS_OPTIONS
         if siteid in opts:
             opts = opts[siteid]

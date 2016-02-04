@@ -1,13 +1,15 @@
-from django.utils.translation import ugettext
+import logging
+
 from livesettings import values
 from livesettings.models import SettingNotSet
 from livesettings.utils import is_string_like
 
-import logging
+from django.utils.translation import ugettext
 
 log = logging.getLogger('configuration')
 
 _NOTSET = object()
+
 
 class ConfigurationSettings(object):
     """A singleton manager for ConfigurationSettings"""
@@ -117,13 +119,13 @@ class ConfigurationSettings(object):
     def __init__(self):
         if ConfigurationSettings.__instance is None:
             ConfigurationSettings.__instance = ConfigurationSettings.__impl()
-            #ConfigurationSettings.__instance.load_app_configurations()
+            # ConfigurationSettings.__instance.load_app_configurations()
 
         self.__dict__['_ConfigurationSettings__instance'] = ConfigurationSettings.__instance
 
     def __getattr__(self, attr):
-            """ Delegate access to implementation """
-            return getattr(self.__instance, attr)
+        """ Delegate access to implementation """
+        return getattr(self.__instance, attr)
 
     def __getitem__(self, key):
         return self.__instance[key]
@@ -138,10 +140,12 @@ class ConfigurationSettings(object):
     def __unicode__(self):
         return "ConfigurationSettings: " + str(self.groups())
 
+
 def config_exists(group, key):
     """Test to see if a setting has been registered"""
 
     return ConfigurationSettings().has_config(group, key)
+
 
 def config_get(group, key):
     """Get a configuration setting"""
@@ -151,8 +155,10 @@ def config_get(group, key):
         log.debug('SettingNotSet: %s.%s', group, key)
         raise
 
+
 def config_get_group(group):
     return ConfigurationSettings()[group]
+
 
 def config_collect_values(group, groupkey, key, unique=True, skip_missing=True):
     """Look up (group, groupkey) from config, then take the values returned and
@@ -186,6 +192,7 @@ def config_collect_values(group, groupkey, key, unique=True, skip_missing=True):
 
     return ret
 
+
 def config_register(value):
     """Register a value or values.
 
@@ -194,9 +201,11 @@ def config_register(value):
     """
     return ConfigurationSettings().register(value)
 
+
 def config_register_list(*args):
     for value in args:
         config_register(value)
+
 
 def config_value(group, key, default=_NOTSET):
     """Get a value from the configuration system"""
@@ -206,6 +215,7 @@ def config_value(group, key, default=_NOTSET):
         if default != _NOTSET:
             return default
         raise
+
 
 def config_value_safe(group, key, default_value):
     """Get a config value with a default fallback, safe for use during SyncDB."""
@@ -237,6 +247,7 @@ def config_choice_values(group, key, skip_missing=True, translate=False):
         choices = [(k, ugettext(v)) for k, v in choices]
 
     return choices
+
 
 def config_add_choice(group, key, choice):
     """Add a choice to a value"""

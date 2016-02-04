@@ -1,13 +1,16 @@
+import logging
+
+from livesettings.functions import config_value
+from livesettings.utils import url_join
+
 from django import template
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
-from livesettings.functions import config_value
-from livesettings.utils import url_join
-import logging
 
 log = logging.getLogger('configuration.config_tags')
 
 register = template.Library()
+
 
 def force_space(value, chars=40):
     """Forces spaces every `chars` in value"""
@@ -29,7 +32,8 @@ def force_space(value, chars=40):
 
     return ' '.join(out)
 
-def break_at(value,  chars=40):
+
+def break_at(value, chars=40):
     """Force spaces into long lines which don't have spaces"""
 
     chars = int(chars)
@@ -47,7 +51,9 @@ def break_at(value,  chars=40):
 
     return " ".join(out)
 
+
 register.filter('break_at', break_at)
+
 
 def config_boolean(option):
     """Looks up the configuration option, returning true or false."""
@@ -62,7 +68,9 @@ def config_boolean(option):
     else:
         return ""
 
+
 register.filter('config_boolean', config_boolean)
+
 
 def admin_site_views(view):
     """Returns a formatted list of sites, rendering for view, if any"""
@@ -81,7 +89,7 @@ def admin_site_views(view):
         links.append((site.name, url_join(paths)))
 
     ret = {
-        'links' : links,
+        'links': links,
     }
     return ret
 

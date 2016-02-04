@@ -1,7 +1,7 @@
-import sys
-import types
 import os
+import sys
 from functools import reduce
+
 
 def can_loop_over(maybe):
     """Test value to see if it is list like"""
@@ -12,6 +12,7 @@ def can_loop_over(maybe):
     else:
         return 1
 
+
 def is_list_or_tuple(maybe):
     return isinstance(maybe, (tuple, list))
 
@@ -20,10 +21,11 @@ def is_scalar(maybe):
     """Test to see value is a string, an int, or some other scalar type"""
     return is_string_like(maybe) or not can_loop_over(maybe)
 
+
 def is_string_like(maybe):
     """Test value to see if it acts like a string"""
     try:
-        maybe+""
+        maybe + ""
     except TypeError:
         return 0
     else:
@@ -41,6 +43,7 @@ def flatten_list(sequence, scalarp=is_scalar, result=None):
         else:
             flatten_list(item, scalarp, result)
 
+
 def load_module(module):
     """Load a named python module."""
     try:
@@ -50,12 +53,14 @@ def load_module(module):
         module = sys.modules[module]
     return module
 
+
 def get_flat_list(sequence):
     """flatten out a list and return the flat list"""
     flat = []
     flatten_list(sequence, result=flat)
     return flat
-    
+
+
 def url_join(*args):
     """Join any arbitrary strings into a forward-slash delimited string.
     Do not strip leading / from first element, nor trailing / from last element.
