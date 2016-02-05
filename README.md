@@ -38,6 +38,9 @@ urlpatterns = [
     url(r'^settings/', include('livesettings.urls')),
 ]
 ```
+
+> Checkout the [Sample screenshot of livesetting editor](https://github.com/kunaldeo/django-livesettings3/wiki/Sample-Settings-Editor-Screenshot)
+
 ### Create `config.py`
 Create `config.py` within your app directory where your `models.py` is located. We will use `config.py` to register the settings value.
 
@@ -105,7 +108,11 @@ def index(request):
 
 ## Security and Permissions
 
-In order to give non-superusers access to the /settings/ views, open Django Admin Auth screen and give the user or to its group the permission livesettings|setting|Can change settting. The same permission is needed to view the form and submit. Permissions for insert or delete and any permissions for “long setting” are ignored.
+In order to give non-superusers access to the /settings/ views, open Django Admin Auth screen and give the user or to its group the permission livesettings|setting|Can change settting. 
+
+> Checkout the [permissions screenshot](https://github.com/kunaldeo/django-livesettings3/wiki/django-livesettings3-Permissions)
+
+The same permission is needed to view the form and submit. Permissions for insert or delete and any permissions for “long setting” are ignored.
 
 > Superusers will have access to this setting without enabling any specific permissions.
 
