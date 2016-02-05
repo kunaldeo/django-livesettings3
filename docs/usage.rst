@@ -77,7 +77,7 @@ In a :file:`views.py`, you can use the config_value function to get access to th
 
 
     from django.shortcuts import render_to_response
-    from livesettings import config_value
+    from livesettings.functions import config_value
 
     def index(request):
         image_count = config_value('MyApp','NUM_IMAGES')
