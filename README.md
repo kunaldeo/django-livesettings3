@@ -1,6 +1,6 @@
 django-livesettings3
 =====
-[![Build Status](https://travis-ci.org/kunaldeo/django-livesettings3.svg?branch=master)](https://travis-ci.org/kunaldeo/django-livesettings3) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3)
+[![Build Status](https://travis-ci.org/kunaldeo/django-livesettings3.svg?branch=master)](https://travis-ci.org/kunaldeo/django-livesettings3) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3) [![codecov.io](https://codecov.io/github/kunaldeo/django-livesettings3/coverage.svg?branch=master)](https://codecov.io/github/kunaldeo/django-livesettings3?branch=master)
 
 This is a Python 3 Port of django-livesettings that has been tested with Python 3.5.1 and Django 1.9.2. I will keep this updated with latest stable Python and Django. 
 
