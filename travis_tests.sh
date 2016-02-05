@@ -1,2 +1,3 @@
 #!/bin/bash
-python test-project/manage.py test livesettings
+coverage run test-project/manage.py test livesettings
+
