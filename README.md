@@ -76,7 +76,7 @@ config_register(MultipleStringValue(
 ```
 
 ### Activate `config.py`
-To activate the `config.py` you need to call this from your `models.py` file.
+To activate the `config.py` you need to import `config` from `models.py` file.
 
 ```python
 from * import config
