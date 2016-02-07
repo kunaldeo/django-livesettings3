@@ -85,7 +85,7 @@ To activate the `config.py` you need to import `config` from `models.py` file.
 from * import config
 ```
 
-> Linter Warning: Becareful of PyCharm's `Optimize Imports` as it may remove it thinking it is never called!
+> Linter Warning: Becareful of PyCharm's `Optimize Imports`, it may remove this line as it is never called directly!
 
 ### Accessing Values in view
 
