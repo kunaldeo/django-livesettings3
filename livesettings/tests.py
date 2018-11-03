@@ -4,9 +4,9 @@ import keyedcache
 
 import livesettings
 from django.conf import settings as djangosettings
-from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from livesettings.functions import config_register, config_exists, \
     config_register_list, config_get, ConfigurationSettings, config_add_choice, \
     config_choice_values, config_value, config_get_group, config_collect_values

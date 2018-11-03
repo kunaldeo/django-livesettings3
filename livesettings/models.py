@@ -135,7 +135,7 @@ class ImmutableSetting(object):
 
 
 class Setting(models.Model, CachedObjectMixin):
-    site = models.ForeignKey(Site, verbose_name=_('Site'))
+    site = models.ForeignKey(Site, verbose_name=_('Site'), on_delete=models.CASCADE)
     group = models.CharField(max_length=100, blank=False, null=False)
     key = models.CharField(max_length=100, blank=False, null=False)
     value = models.CharField(max_length=255, blank=True)
@@ -182,7 +182,7 @@ class LongSettingManager(models.Manager):
 
 class LongSetting(models.Model, CachedObjectMixin):
     """A Setting which can handle more than 255 characters"""
-    site = models.ForeignKey(Site, verbose_name=_('Site'))
+    site = models.ForeignKey(Site, verbose_name=_('Site'), on_delete=models.CASCADE)
     group = models.CharField(max_length=100, blank=False, null=False)
     key = models.CharField(max_length=100, blank=False, null=False)
     value = models.TextField(blank=True)
