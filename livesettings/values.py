@@ -3,6 +3,10 @@
 http://code.google.com/p/django-values/
 """
 from decimal import Decimal
+import os
+
+from livesettings.forms import LocalizedMultipleChoiceField, LocalizedChoiceField
+from livesettings.widgets import ImageInput
 
 try:
     from collections import OrderedDict as SortedDict
@@ -15,11 +19,14 @@ except ImportError:
     from django.utils import simplejson as json
 
 from django import forms
+from django.conf import settings as djangosettings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.files import storage
 from django.db import connection, DatabaseError
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext, ugettext_lazy as _
+from django.utils.translation import get_language as _get_language
 from livesettings.models import find_setting, LongSetting, Setting, SettingNotSet
 from livesettings.overrides import get_overrides
 from livesettings.utils import load_module, is_string_like, is_list_or_tuple
@@ -44,6 +51,19 @@ log = logging.getLogger('configuration')
 # It is different from None or "" which are result of an empty field in the form.
 # It leads to to the existing more complicated code of Values classes, hopefully more robust.
 NOTSET = object()
+
+
+def get_language():
+    return _get_language() or djangosettings.LANGUAGE_CODE
+
+
+def format_setting_name(token):
+    """Returns string in style in upper case
+    with underscores to separate words"""
+    token = token.replace(' ', '_')
+    token = token.replace('-', '_')
+    bits = token.split('_')
+    return '_'.join(bits).upper()
 
 
 class SortedDotDict(object):
@@ -140,6 +160,24 @@ class SortedDotDict(object):
         return self._dict.viewvalues(*args, **kwargs)
 
 
+class SuperGroup(object):
+    """Aggregates ConfigurationGroup's into super-groups
+    that are used only for the presentation in the UI"""
+    def __init__(self, name, ordering = 0):
+        self.name = name
+        self.ordering = ordering
+        self.groups = list()
+
+    def append(self, group):
+        """adds instance of :class:`ConfigurationGroup`
+        to the super group
+        """
+        if group not in self.groups:
+            self.groups.append(group)
+
+
+BASE_SUPER_GROUP = SuperGroup(_('Main'))
+
 class ConfigurationGroup(SortedDotDict):
     """A simple wrapper for a group of configuration values"""
 
@@ -159,6 +197,8 @@ class ConfigurationGroup(SortedDotDict):
         self.name = name
         self.ordering = kwargs.pop('ordering', 1)
         self.requires = kwargs.pop('requires', None)
+        self.super_group = kwargs.pop('super_group', BASE_SUPER_GROUP)
+        self.super_group.append(self)
         if self.requires:
             reqval = kwargs.pop('requiresvalue', key)
             if not is_list_or_tuple(reqval):
@@ -229,6 +269,7 @@ class Value(object):
         self.choices = kwargs.get('choices', [])
         self.ordering = kwargs.pop('ordering', 0)
         self.hidden = kwargs.pop('hidden', False)
+        self.localized = kwargs.pop('localized', False)
         self.update_callback = kwargs.pop('update_callback', None)
         self.requires = kwargs.pop('requires', None)
         if self.requires:
@@ -288,7 +329,7 @@ class Value(object):
     def choice_field(self, **kwargs):
         if self.hidden:
             kwargs['widget'] = forms.MultipleHiddenInput()
-        return forms.ChoiceField(choices=self.choices, **kwargs)
+        return LocalizedChoiceField(choices=self.choices, **kwargs)
 
     def _choice_values(self):
         choices = self.choices
@@ -298,7 +339,7 @@ class Value(object):
     choice_values = property(fget=_choice_values)
 
     def copy(self):
-        new_value = self.__class__(self.key)
+        new_value = self.__class__(self.group, self.key)
         new_value.__dict__ = self.__dict__.copy()
         return new_value
 
@@ -355,12 +396,23 @@ class Value(object):
         field.default_text = self.default_text
         return field
 
-    def make_setting(self, db_value):
+
+    def make_setting_with_value(self, value, language_code=None):
+        db_value = self.get_db_prep_save(value)
+        return self.make_setting(db_value, language_code=language_code)
+
+    def make_setting(self, db_value, language_code=None):
         log.debug('new setting %s.%s', self.group.key, self.key)
-        return Setting(group=self.group.key, key=self.key, value=db_value)
+        key = self.key
+        if self.localized:
+            key += '_' + format_setting_name(language_code or get_language())
+        return Setting(group=self.group.key, key=key, value=db_value)
 
     def _setting(self):
-        return find_setting(self.group.key, self.key)
+        key = self.key
+        if self.localized:
+            key += '_' + format_setting_name(get_language())
+        return find_setting(self.group.key, key)
 
     setting = property(fget=_setting)
 
@@ -368,14 +420,19 @@ class Value(object):
         global is_setting_initializing
         use_db, overrides = get_overrides()
 
+        lang = get_language()
+
+        key = self.key
+        if self.localized:
+            key += '_' + format_setting_name(lang)
         if not use_db:
             try:
-                val = overrides[self.group.key][self.key]
+                val = overrides[self.group.key][key]
             except KeyError:
                 if self.use_default:
                     val = self.default
                 else:
-                    raise SettingNotSet('%s.%s is not in your LIVESETTINGS_OPTIONS' % (self.group.key, self.key))
+                    raise SettingNotSet('%s.%s is not in your LIVESETTINGS_OPTIONS' % (self.group.key, key))
 
         else:
             try:
@@ -424,7 +481,7 @@ class Value(object):
                 is_setting_initializing = False
         return val
 
-    def update(self, value):
+    def update(self, value, language_code=None):
         use_db, overrides = get_overrides()
 
         if use_db:
@@ -442,7 +499,7 @@ class Value(object):
                     s.value = db_value
 
                 except SettingNotSet:
-                    s = self.make_setting(db_value)
+                    s = self.make_setting(db_value, language_code=language_code)
 
                 if self.use_default and self.to_python(self.default) == self.to_python(new_value):
                     if s.id:
@@ -452,7 +509,7 @@ class Value(object):
                     log.info("Updated setting %s.%s = %s", self.group.key, self.key, value)
                     s.save()
 
-                signals.configuration_value_changed.send(self, old_value=current_value, new_value=new_value,
+                signals.configuration_value_changed.send(self.__class__, old_value=current_value, new_value=new_value,
                                                          setting=self)
 
                 return True
@@ -500,6 +557,7 @@ class BooleanValue(Value):
     class field(forms.BooleanField):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.BooleanField.__init__(self, *args, **kwargs)
 
     def add_choice(self, choice):
@@ -519,6 +577,7 @@ class DecimalValue(Value):
 
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.DecimalField.__init__(self, *args, **kwargs)
 
         def clean(self, value):
@@ -589,6 +648,7 @@ class FloatValue(Value):
 
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.FloatField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
@@ -608,6 +668,7 @@ class IntegerValue(Value):
 
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.IntegerField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
@@ -678,6 +739,7 @@ class PositiveIntegerValue(IntegerValue):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             kwargs['min_value'] = 0
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.IntegerField.__init__(self, *args, **kwargs)
 
 
@@ -685,6 +747,7 @@ class StringValue(Value):
     class field(forms.CharField):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.CharField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
@@ -735,16 +798,31 @@ class PasswordValue(StringValue):
         return new_value
 
 
+class URLValue(Value):
+
+    class field(forms.URLField):
+
+        def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            forms.URLField.__init__(self, **kwargs)
+
+
+
 class LongStringValue(Value):
     class field(forms.CharField):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             kwargs['widget'] = forms.Textarea()
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.CharField.__init__(self, *args, **kwargs)
 
-    def make_setting(self, db_value):
+    def make_setting(self, db_value, language_code=None):
         log.debug('new long setting %s.%s', self.group.key, self.key)
-        return LongSetting(group=self.group.key, key=self.key, value=db_value)
+        key = self.key
+        if self.localized and language_code:
+            key = self.key + '_' + format_setting_name(language_code)
+        return LongSetting(group=self.group.key, key=key, value=db_value)
 
     def to_python(self, value):
         if value == NOTSET:
@@ -754,16 +832,91 @@ class LongStringValue(Value):
     to_editor = to_python
 
 
+class ImageValue(StringValue):
+    def __init__(self, *args, **kwargs):
+        self.allowed_file_extensions = kwargs.pop(
+            'allowed_file_extensions',
+            ('jpg', 'gif', 'png')
+        )
+        self.upload_directory = kwargs.pop(
+                                    'upload_directory',
+            djangosettings.MEDIA_ROOT
+                                )
+        self.upload_url = kwargs.pop(
+                                    'upload_url',
+            djangosettings.MEDIA_URL
+                                )
+        self.url_resolver = kwargs.pop('url_resolver', None)
+        super(ImageValue, self).__init__(*args, **kwargs)
+
+    class field(forms.FileField):
+        def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
+            self.allowed_file_extensions = kwargs.pop('allowed_file_extensions')
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            url_resolver = kwargs.pop('url_resolver')
+            kwargs['widget'] = ImageInput(url_resolver = url_resolver)
+            forms.FileField.__init__(self, *args, **kwargs)
+
+        def clean(self, file_data, initial=None):
+            if not file_data and initial:
+                return initial
+            (base_name, ext) = os.path.splitext(file_data.name)
+            #first character in ext is .
+            if ext[1:].lower() not in self.allowed_file_extensions:
+                error_message = _('Allowed image file types are %(types)s') \
+                        % {'types': ', '.join(self.allowed_file_extensions)}
+                raise forms.ValidationError(error_message)
+
+    def make_field(self, **kwargs):
+        kwargs['url_resolver'] = self.url_resolver
+        kwargs['allowed_file_extensions'] = self.allowed_file_extensions
+        return super(ImageValue, self).make_field(**kwargs)
+
+    def update(self, uploaded_file, language_code=None):
+        """uploaded_file is an instance of
+        django UploadedFile object
+        """
+        #0) initialize file storage
+        file_storage_class = storage.get_storage_class()
+
+        storage_settings = {}
+        if djangosettings.DEFAULT_FILE_STORAGE == \
+            'django.core.files.storage.FileSystemStorage':
+            storage_settings = {
+                'location': self.upload_directory,
+                'base_url': self.upload_url
+            }
+
+        file_storage = file_storage_class(**storage_settings)
+
+        #1) come up with a file name
+        #todo: need better function here to calc name
+        file_name = file_storage.get_available_name(uploaded_file.name)
+        file_storage.save(file_name, uploaded_file)
+        url = file_storage.url(file_name)
+
+        old_file = self.value
+        old_file = old_file.replace(self.upload_url, '', 1)
+        old_file_path = os.path.join(self.upload_directory, old_file)
+        if os.path.isfile(old_file_path):
+            os.unlink(old_file_path)
+
+        #saved file path is relative to the upload_directory
+        #so that things could be easily relocated
+        super(ImageValue, self).update(url, language_code=language_code)
+
 class MultipleStringValue(Value):
     class field(forms.CharField):
 
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             forms.CharField.__init__(self, *args, **kwargs)
 
     def choice_field(self, **kwargs):
         kwargs['required'] = False
-        return forms.MultipleChoiceField(choices=self.choices, **kwargs)
+        return LocalizedMultipleChoiceField(choices=self.choices, **kwargs)
 
     def get_db_prep_save(self, value):
         if is_string_like(value):
@@ -789,7 +942,7 @@ class MultipleStringValue(Value):
 
 
 class LongMultipleStringValue(MultipleStringValue):
-    def make_setting(self, db_value):
+    def make_setting(self, db_value, language_code=None):
         log.debug('new long setting %s.%s', self.group.key, self.key)
         return LongSetting(group=self.group.key, key=self.key, value=db_value)
 
@@ -807,7 +960,7 @@ class ModuleValue(Value):
         """Load a child module"""
         value = self._value()
         if value == NOTSET:
-            raise SettingNotSet("%s.%s", self.group.key, self.key)
+            raise SettingNotSet(f"{self.group.key}.{self.key}")
         else:
             return load_module("%s.%s" % (value, module))
 

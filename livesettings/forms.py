@@ -1,7 +1,6 @@
 import logging
 
 from django import forms
-from livesettings.values import ConfigurationGroup
 
 log = logging.getLogger('configuration')
 
@@ -10,6 +9,8 @@ class SettingsEditor(forms.Form):
     "Base editor, from which customized forms are created"
 
     def __init__(self, *args, **kwargs):
+        from livesettings.values import ConfigurationGroup
+
         settings = kwargs.pop('settings')
         super(SettingsEditor, self).__init__(*args, **kwargs)
         flattened = []
@@ -38,3 +39,17 @@ class SettingsEditor(forms.Form):
                 # log.debug("Added field: %s = %s" % (k, str(field)))
 
         self.groups = groups
+
+
+class LocalizedChoiceField(forms.ChoiceField):
+    def __init__(self, *args, **kwargs):
+        #self.language_code = kwargs.pop('language_code',
+        #                                django_settings.LANGUAGE_CODE)
+        super(LocalizedChoiceField, self).__init__(*args, **kwargs)
+
+
+class LocalizedMultipleChoiceField(forms.MultipleChoiceField):
+    def __init__(self, *args, **kwargs):
+        #self.language_code = kwargs.pop('language_code',
+        #                                django_settings.LANGUAGE_CODE)
+        super(LocalizedMultipleChoiceField, self).__init__(*args, **kwargs)
