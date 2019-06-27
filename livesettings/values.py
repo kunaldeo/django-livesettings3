@@ -650,7 +650,7 @@ class PercentValue(Value):
             return str(Decimal(value) / 100)
 
         class widget(forms.TextInput):
-            def render(self, name, value, attrs=None):
+            def render(self, name, value, attrs=None, renderer=None):
                 # Place a percent sign after a smaller text field
                 try:
                     value = str("%.2f" % (Decimal(value) * 100))
