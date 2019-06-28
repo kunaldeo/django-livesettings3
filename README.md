@@ -2,7 +2,7 @@ django-livesettings3
 =====
 [![Build Status](https://travis-ci.org/kunaldeo/django-livesettings3.svg?branch=master)](https://travis-ci.org/kunaldeo/django-livesettings3) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3) [![codecov.io](https://codecov.io/github/kunaldeo/django-livesettings3/coverage.svg?branch=master)](https://codecov.io/github/kunaldeo/django-livesettings3?branch=master)
 
-This is a Python 3 Port of django-livesettings that has been tested with Python 3.5.X and Django 1.9.X. I will keep this updated with latest stable Python and Django. 
+This is a Python 3 Port of django-livesettings that has been tested with Python 3.6.X and Django 3.X.
 
 **django-livesettings3** provides the ability to configure settings via an admin interface, rather than by editing settings.py. In addition, livesettings allows you to set sane defaults so that your site can be perfectly functional without any changes. Livesettings uses caching to make sure this has minimal impact on your site’s performance. Finally, if you wish to lock down your site and disable the settings, you can export your livesettings and store them in your settings.py. This allows you have flexibility in deciding how various users interact with your app.
 
