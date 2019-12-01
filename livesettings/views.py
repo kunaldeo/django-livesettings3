@@ -35,7 +35,7 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
         if request.method == 'POST':
             # Populate the form with user-submitted data
             data = request.POST.copy()
-            form = forms.SettingsEditor(data, settings=settings)
+            form = forms.SettingsEditor(data, request.FILES, settings=settings)
             if form.is_valid():
                 form.full_clean()
                 for name, value in list(form.cleaned_data.items()):

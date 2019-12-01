@@ -36,7 +36,8 @@ from . import signals
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
            'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
-           'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue', 'PasswordValue']
+           'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue', 'PasswordValue',
+           'URLValue', 'ImageValue']
 
 _WARN = {}
 try:
@@ -839,14 +840,14 @@ class ImageValue(StringValue):
             ('jpg', 'gif', 'png')
         )
         self.upload_directory = kwargs.pop(
-                                    'upload_directory',
+            'upload_directory',
             djangosettings.MEDIA_ROOT
-                                )
+        )
         self.upload_url = kwargs.pop(
-                                    'upload_url',
+            'upload_url',
             djangosettings.MEDIA_URL
-                                )
-        self.url_resolver = kwargs.pop('url_resolver', None)
+        )
+        self.url_resolver = kwargs.pop('url_resolver', lambda v: v)
         super(ImageValue, self).__init__(*args, **kwargs)
 
     class field(forms.FileField):

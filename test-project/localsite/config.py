@@ -180,4 +180,26 @@ config_register_list(
                         )
 )
 
+URL_GROUP = ConfigurationGroup('Urls', _('Url settings'), ordering=102)
+
+config_register(URLValue(
+    URL_GROUP,
+    'EXAMPLE_URL',
+    default='https://github.com/kunaldeo/django-livesettings3/',
+    description=_('A sample url setting'),
+    help_text=_('Add this to display a link on the main page')
+))
+
+
+IMAGES_GROUP = ConfigurationGroup('Images', _('Image settings'), ordering=103)
+
+config_register(ImageValue(
+    IMAGES_GROUP,
+    'IMAGE_URL',
+    default=None,
+    description=_('An image for the app'),
+    help_text=_('You upload it and we show it on the main page')
+))
+
+
 # More examples for modules in "https://bitbucket.org/chris1610/satchmo/src/tip/satchmo/apps/payment/modules/"

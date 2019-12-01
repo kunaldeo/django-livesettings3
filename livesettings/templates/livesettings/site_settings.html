@@ -93,7 +93,7 @@
                 </p>
             {% endif %}
             {% if form.fields %}
-                <form method="post" id="settingsform">{% csrf_token %}
+                <form method="post" id="settingsform" enctype="multipart/form-data">{% csrf_token %}
                     {% for field in form %}
                         {% if field.is_hidden %}
                             <tr style="display: none;">
