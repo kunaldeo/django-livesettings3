@@ -20,6 +20,6 @@ setup(
                  'Programming Language :: Python :: 3.5',
                  'Framework :: Django'],
     packages=find_packages(),
-    install_requires=['django>=1.8', 'django-keyedcache3'],
+    install_requires=['django>=1.8,<3', 'django-keyedcache3'],
     include_package_data=True,
 )
