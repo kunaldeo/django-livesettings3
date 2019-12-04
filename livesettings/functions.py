@@ -16,6 +16,7 @@ class ConfigurationSettings(object):
     class __impl(object):
         def __init__(self):
             self.settings = values.SortedDotDict()
+            self.super_groups = list()
             self.prereg = {}
 
         def __getitem__(self, key):
@@ -75,6 +76,10 @@ class ConfigurationSettings(object):
             """Return ordered list"""
             return list(self.settings.values())
 
+        def get_super_groups(self):
+            """Return ordered list of super groups"""
+            return self.super_groups
+
         def has_config(self, group, key):
             if isinstance(group, values.ConfigurationGroup):
                 group = group.key
@@ -92,6 +97,11 @@ class ConfigurationSettings(object):
                 self.prereg[k].append(choice)
             else:
                 self.prereg[k] = [choice]
+
+        def register_super_group(self, super_group):
+            """Registers the super group"""
+            if super_group not in self.super_groups:
+                self.super_groups.append(super_group)
 
         def register(self, value):
             g = value.group
@@ -200,6 +210,8 @@ def config_register(value):
     """
     return ConfigurationSettings().register(value)
 
+def config_register_super_group(super_group):
+    return ConfigurationSettings().register_super_group(super_group)
 
 def config_register_list(*args):
     for value in args:

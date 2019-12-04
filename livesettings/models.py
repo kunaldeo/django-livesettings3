@@ -151,11 +151,12 @@ class Setting(models.Model, CachedObjectMixin):
     def cache_key(self, *args, **kwargs):
         return cache_key('Setting', self.site, self.group, self.key)
 
-    def delete(self):
+    def delete(self, using=None, keep_parents=False):
         self.cache_delete()
         super(Setting, self).delete()
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
         try:
             site = self.site
         except Site.DoesNotExist:
@@ -204,11 +205,12 @@ class LongSetting(models.Model, CachedObjectMixin):
         # Setting will override a LongSetting.
         return cache_key('Setting', self.site, self.group, self.key)
 
-    def delete(self):
+    def delete(self, using=None, keep_parents=False):
         self.cache_delete()
         super(LongSetting, self).delete()
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
         try:
             site = self.site
         except Site.DoesNotExist:
@@ -218,3 +220,4 @@ class LongSetting(models.Model, CachedObjectMixin):
 
     class Meta:
         unique_together = ('site', 'group', 'key')
+        app_label = 'livesettings'

@@ -1,16 +1,37 @@
 <html>
 <body>
 <table border="1">
-    <tr>
-        <td>Measurement system:</td>
-        <td>{{ measurement_system }}</td>
-    </tr>
-    <tr>
-        <td>Image count:</td>
-        <td>{{ image_count }}</td>
-    </tr>
+  <tr>
+    <td>Measurement system:</td>
+    <td>{{ measurement_system }}</td>
+  </tr>
+  <tr>
+    <td>Image count:</td>
+    <td>{{ image_count }}</td>
+  </tr>
+  <tr>
+    <td>Sample url:</td>
+    <td>
+      {% if example_url %}
+        <a href="{{example_url}}" rel="noopener noreferrer">{{ example_url }}</a>
+      {% else %}
+        No url yet.
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+      <td>A sample image:</td>
+      <td>
+        {% if image_url %}
+          <img src="{{ image_url }}" style="width: 100%; max-height: 350px; object-fit: cover;" />
+        {% else %}
+          No image yet.
+        {% endif %}
+      </td>
+  </tr>
 </table>
-<p>Values <a href="{% url 'satchmo_site_settings' %}">can be modified here</a> if the user has sufficient permissions
-    (livesettings_setting:change).</p>
+<p>
+  Values <a href="{% url 'satchmo_site_settings' %}">can be modified here</a> if the user has sufficient permissions
+  (livesettings_setting:change).</p>
 </body>
 </html>

@@ -24,4 +24,6 @@ local_bursar_*py
 setuptools_hg-*
 *.bak
 .eggs
-
+env
+test-project/test_project/media/*
+!test-project/test_project/media/README.md
