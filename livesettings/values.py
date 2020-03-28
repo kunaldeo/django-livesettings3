@@ -821,8 +821,8 @@ class LongStringValue(Value):
     def make_setting(self, db_value, language_code=None):
         log.debug('new long setting %s.%s', self.group.key, self.key)
         key = self.key
-        if self.localized and language_code:
-            key = self.key + '_' + format_setting_name(language_code)
+        if self.localized:
+            key += '_' + format_setting_name(language_code or get_language())
         return LongSetting(group=self.group.key, key=key, value=db_value)
 
     def to_python(self, value):
