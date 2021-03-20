@@ -33,9 +33,9 @@ def _safe_get_siteid(site):
         except Exception as e:
             if is_site_initializing and isinstance(e, DatabaseError) and str(e).find('django_site') > -1:
                 if is_first_warn:
-                    log.warn(str(e).strip())
+                    log.warning(str(e).strip())
                     is_first_warn = False
-                log.warn('Can not get siteid; probably before syncdb; ROLLBACK')
+                log.warning('Can not get siteid; probably before syncdb; ROLLBACK')
                 connection._rollback()
             else:
                 is_site_initializing = False

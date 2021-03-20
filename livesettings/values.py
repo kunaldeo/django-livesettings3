@@ -462,9 +462,9 @@ class Value(object):
                 if is_setting_initializing and isinstance(e, DatabaseError) and str(e).find(
                         "livesettings_setting") > -1:
                     if 'livesettings_setting' not in _WARN:
-                        log.warn(str(e).strip())
+                        log.warning(str(e).strip())
                         _WARN['livesettings_setting'] = True
-                    log.warn('Error loading livesettings from table, OK if you are in syncdb or before it. ROLLBACK')
+                    log.warning('Error loading livesettings from table, OK if you are in syncdb or before it. ROLLBACK')
                     connection._rollback()
 
                     if self.use_default:

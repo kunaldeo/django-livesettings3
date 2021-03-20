@@ -237,7 +237,7 @@ def config_value_safe(group, key, default_value):
     except SettingNotSet:
         pass
     except ImportError as e:
-        log.warn("Error getting %s.%s, OK if you are in SyncDB.", group, key)
+        log.warning("Error getting %s.%s, OK if you are in SyncDB.", group, key)
 
     return raw
 
