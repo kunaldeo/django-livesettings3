@@ -60,7 +60,7 @@ def config_boolean(option):
     try:
         val = config_value(*args)
     except:
-        log.warn('config_boolean tag: Tried to look up config setting "%s", got SettingNotSet, returning False', option)
+        log.warning('config_boolean tag: Tried to look up config setting "%s", got SettingNotSet, returning False', option)
         val = False
     if val:
         return "true"
