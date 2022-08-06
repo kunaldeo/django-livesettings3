@@ -168,6 +168,7 @@ class Setting(models.Model, CachedObjectMixin):
 
     class Meta:
         unique_together = ('site', 'group', 'key')
+        app_label = 'livesettings'
 
 
 class LongSettingManager(models.Manager):
