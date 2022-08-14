@@ -27,3 +27,4 @@ setuptools_hg-*
 env
 test-project/test_project/media/*
 !test-project/test_project/media/README.md
+.vscode/
