@@ -15,7 +15,7 @@ We will create the following :file:`config.py`::
 
     from livesettings.functions import config_register
     from livesettings.values import ConfigurationGroup, PositiveIntegerValue, MultipleStringValue
-    from django.utils.translation import ugettext_lazy as _
+    from django.utils.translation import gettext_lazy as _
 
     # First, setup a grup to hold all our possible configs
     MYAPP_GROUP = ConfigurationGroup(

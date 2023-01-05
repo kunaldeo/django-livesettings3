@@ -7,7 +7,7 @@ try:
 except ImportError:
     from django.db.models import loading as apps
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from keyedcache import cache_key, cache_get, cache_set, NotCachedError
 from keyedcache.models import CachedObjectMixin
 from livesettings.overrides import get_overrides

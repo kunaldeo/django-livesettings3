@@ -47,7 +47,7 @@ Create `config.py` within your app directory where your `models.py` is located. 
 `config.py`
 
 ```python
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from livesettings.functions import config_register
 from livesettings.values import ConfigurationGroup, PositiveIntegerValue, MultipleStringValue
 
