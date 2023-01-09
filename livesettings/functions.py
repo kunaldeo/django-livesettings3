@@ -1,6 +1,6 @@
 import logging
 
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
 from livesettings import values
 from livesettings.models import SettingNotSet
 from livesettings.utils import is_string_like
@@ -255,7 +255,7 @@ def config_choice_values(group, key, skip_missing=True, translate=False):
             raise SettingNotSet('%s.%s' % (group, key))
 
     if translate:
-        choices = [(k, ugettext(v)) for k, v in choices]
+        choices = [(k, gettext(v)) for k, v in choices]
 
     return choices
 
