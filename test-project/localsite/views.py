@@ -1,4 +1,8 @@
-from django.shortcuts import render_to_response
+try:
+    from django.shortcuts import render_to_response as render
+except ImportError:
+    from django.shortcuts import render
+
 from livesettings.functions import config_value
 
 
@@ -9,7 +13,7 @@ def index(request):
     measurement_system = config_value('MyApp', 'MEASUREMENT_SYSTEM')
     image_url = config_value('Images', 'IMAGE_URL')
     example_url = config_value('Urls', 'EXAMPLE_URL')
-    return render_to_response('myapp/index.html',
+    return render('myapp/index.html',
                               {'image_count': image_count,
                                'measurement_system': measurement_system[0],
                                'image_url': image_url,

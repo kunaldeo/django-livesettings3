@@ -606,7 +606,10 @@ class PermissionTest(TestCase):
         "Testing a sufficiently authorized user"
         self.client.login(username='cautious_developer', password='secret')
         response = self.client.get(reverse('satchmo_site_settings'))
-        self.assertContains(response, 'SingleItem')
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(response.headers['Location'])
+        template_names = [template.name for template in response.templates]
+        self.assertTrue('livesettings/group_settings.html' in template_names)
         self.client.login(username='superuser', password='secret')
         response = self.client.get(reverse('settings_export'))
         self.assertContains(response, 'LIVESETTINGS_OPTIONS = ')
@@ -633,7 +636,7 @@ class PermissionTest(TestCase):
         config_register(val2)
         val2.update('unsecure_pwd')
         self.client.login(username='superuser', password='secret')
-        response = self.client.get('/settings/')
+        response = self.client.get('/settings/BASE/')
         self.assertContains(response, 'password_to_reading_external_payment_gateway')
         self.assertNotContains(response, 'secret')
         self.assertContains(response, 'unsecure_password')

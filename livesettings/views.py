@@ -25,7 +25,10 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
 
     all_super_groups = mgr.get_super_groups()
     if not group and len(mgr.groups()) > 1:
-        default_group = all_super_groups[0].groups[0]
+        if len(all_super_groups) > 0:
+            default_group = all_super_groups[0].groups[0]
+        else:
+            default_group = mgr.groups()[0]
         return HttpResponseRedirect(reverse('livesettings_group', args=[default_group.key]))
 
     if group is None:
