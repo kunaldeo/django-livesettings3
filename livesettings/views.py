@@ -2,8 +2,10 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from livesettings import forms
@@ -17,9 +19,15 @@ log = logging.getLogger('livesettings.views')
 def group_settings(request, group, template='livesettings/group_settings.html'):
     # Determine what set of settings this editor is used for
 
-    use_db, overrides = get_overrides();
+    use_db, overrides = get_overrides()
 
     mgr = ConfigurationSettings()
+
+    all_super_groups = mgr.get_super_groups()
+    if not group and len(mgr.groups()) > 1:
+        default_group = all_super_groups[0].groups[0]
+        return HttpResponseRedirect(reverse('livesettings_group', args=[default_group.key]))
+
     if group is None:
         settings = mgr
         title = 'Site settings'
@@ -66,7 +74,10 @@ def group_settings(request, group, template='livesettings/group_settings.html'):
         form = None
 
     return render(request, template, {
-        'all_super_groups': mgr.get_super_groups(),
+        'all_super_groups': all_super_groups,
+        'has_multiple_groups': len(mgr.groups()) > 1,
+        'has_multiple_sites': Site.objects.count() > 1,
+        'site_header': f"{Site.objects.get_current().name} settings",
         'page_class': 'settings',
         'title': title,
         'settings_group': settings,

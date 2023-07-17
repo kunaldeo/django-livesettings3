@@ -1,0 +1,31 @@
+<style>
+  #livesettings-groups-navbar-column {
+    min-width: 250px;
+    max-width: 250px;
+    margin-right: 1.5rem;
+  }
+  #livesettings-groups-navbar-column ul {
+    padding: 0 0 0 0.875rem;
+  }
+  #livesettings-groups-navbar-column h3 {
+    margin-top: 0.3625rem;
+  }
+  .livesettings-supergroup-nav {
+    margin-bottom: 1.25rem;
+  }
+  .livesettings-supergroup-nav a.current {
+    color: var(--accent);
+  }
+</style>
+<div id="livesettings-groups-navbar-column">
+  {% for super_group in all_super_groups %}
+    <div class="livesettings-supergroup-nav">
+      <h3>{{ super_group.name }}</h3>
+      <ul class="livesettings-group-nav">
+        {% for grp in super_group.groups %}
+        <li><a {% if grp.key == group %}class="current"{% endif %} href="{% url 'livesettings_group' grp.key %}">{{ grp.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</div>
