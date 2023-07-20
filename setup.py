@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-livesettings3',
-    version='1.6.0',
+    version='1.6.1',
     description="Python 3 port of django-livesettings",
     long_description="""Python 3 version of django live settings. It provides the ability to configure settings via an admin interface, rather than by editing "settings.py". Documentation avaiable at Github.""",
     author='Kunal Deo',
@@ -22,6 +22,6 @@ setup(
                  'Programming Language :: Python :: 3.10',
                  'Framework :: Django'],
     packages=find_packages(),
-    install_requires=['django>=1.8,<6', 'django-keyedcache3'],
+    install_requires=['django>=1.8,<5', 'django-keyedcache3'],
     include_package_data=True,
 )
