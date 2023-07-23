@@ -2,6 +2,7 @@
 {% load i18n static config_tags %}
 
 {% block extrahead %}{{ block.super }}
+    <script src="{% static "livesettings/js/string_array_widget.js" %}"></script>
     <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
     <script type="text/javascript" src="{% static "admin/js/core.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>

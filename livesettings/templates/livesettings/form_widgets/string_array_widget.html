@@ -1,0 +1,16 @@
+<div id="{{widget.attrs.id}}"
+  class="livesettings-string-array-value"
+  data-default-value="{{widget.default}}"
+>
+  <textarea name="{{widget.name}}" hidden style="display: none;">{{value}}</textarea>
+  <script>
+    (function () {
+      var root = document.getElementById("{{widget.attrs.id}}")
+      var input = root.querySelector('textarea');
+      var widget = new StringArrayWidget({target: root});
+      var value = JSON.parse(decodeURIComponent(input.innerHTML));
+      var defaultValue = JSON.parse(decodeURIComponent(root.dataset.defaultValue));
+      widget.setValues(value, defaultValue, input);
+    })();
+  </script>
+</div>

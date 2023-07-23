@@ -1,3 +1,5 @@
+import json
+from urllib.parse import quote
 from django import forms
 from django.utils import safestring
 
@@ -25,3 +27,19 @@ class ImageInput(forms.FileInput):
         output += super(ImageInput, self).render(name, value, attrs)
         output += '</div>'
         return safestring.mark_safe(output)
+
+
+class StringArrayWidget(forms.TextInput):
+    """StringArrayWidget is a widget for editing a list of strings"""
+    template_name = 'livesettings/form_widgets/string_array_widget.html'
+
+    def __init__(self, *args, default=None, **kwargs):
+        self.default = default
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        """Returns context for rendering"""
+        context = super().get_context(name, value, attrs)
+        context['value'] = value.strip('"')
+        context['widget']['default'] = quote(json.dumps(self.default))
+        return context

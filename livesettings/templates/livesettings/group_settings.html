@@ -6,6 +6,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}"/>
 {% endblock %}
 
+{% block extrahead %}
+    <script src="{% static "livesettings/js/string_array_widget.js" %}"></script>
+{% endblock %}
+
 {% block coltype %}colMS{% endblock %}
 {% block bodyclass %}dashboard{% endblock %}
 {% block userlinks %}<a href="{% url 'admin:index' %}doc/">{% trans 'Documentation' %}</a> /
