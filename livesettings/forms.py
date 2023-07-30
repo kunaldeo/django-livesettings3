@@ -45,6 +45,7 @@ class LocalizedChoiceField(forms.ChoiceField):
     def __init__(self, *args, **kwargs):
         #self.language_code = kwargs.pop('language_code',
         #                                django_settings.LANGUAGE_CODE)
+        kwargs.pop('default', None)
         super(LocalizedChoiceField, self).__init__(*args, **kwargs)
 
 
@@ -52,4 +53,5 @@ class LocalizedMultipleChoiceField(forms.MultipleChoiceField):
     def __init__(self, *args, **kwargs):
         #self.language_code = kwargs.pop('language_code',
         #                                django_settings.LANGUAGE_CODE)
+        kwargs.pop('default', None)
         super(LocalizedMultipleChoiceField, self).__init__(*args, **kwargs)

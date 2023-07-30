@@ -2,23 +2,31 @@
 {% load i18n static config_tags %}
 
 {% block extrahead %}{{ block.super }}
+    <script src="{% static "livesettings/js/string_array_widget.js" %}"></script>
     <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
     <script type="text/javascript" src="{% static "admin/js/core.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/collapse.js" %}"></script>
     <script type="text/javascript">
-        var $ = django.jQuery,
-                uncollapse = function () {
-                    $("fieldset.collapse a.collapse-toggle").each(function () {
-                        var elt = $(this);
-                        if (elt.text() == gettext('Show')) {
-                            elt.click();
-                        }
-                    });
-                    $('fieldset').removeClass('collapsed');
-                    return false
-                };
+        var $ = django.jQuery;
+
+        function toggleCollapseAll() {
+            var allSets = $("fieldset.collapse");
+            var collapsedSets = $("fieldset.collapse.collapsed");
+            if (allSets.length - collapsedSets.length > collapsedSets.length) {
+                allSets.addClass("collapsed");
+            } else {
+                allSets.removeClass("collapsed");
+            }
+            return false;
+        }
+
+        function toggleCollapse(elem) {
+            var fieldset = $(elem).closest('fieldset');
+            fieldset.toggleClass('collapsed');
+            return false;
+        }
     </script>
 {% endblock %}
 
@@ -38,17 +46,35 @@
             list-style: none;
         }
 
-        fieldset.collapsed h2 {
-            display: block !important;
+        fieldset.collapse h2,
+        fieldset.collapse.collapsed h2 {
+            display: flex !important;
         }
 
-        fieldset.collapsed h2 a {
-            display: inline !important;
+        fieldset.collapsed h2 > * {
+            display: block !important
+        }
+
+        fieldset h2 {
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        fieldset h2 a {
+            color: var(--accent);
+            cursor: pointer;
         }
 
         div.fieldcontainer {
             float: left;
             margin-right: 0;
+        }
+
+        .toggle-collapse-all {
+            text-align: right;
+            transform: translateY(-2.65rem);
+            height: 0;
         }
     </style>
 {% endblock %}
@@ -79,6 +105,7 @@
 {% block content %}
     <span style="clear: both;"></span>
     <div id="content-main">
+        <p class="toggle-collapse-all"><a onclick="javascript:return toggleCollapseAll();" href="#">{% trans 'show/hide all' %}</a></p>
         {% if not use_db %}
             <p>{% trans "Livesettings are disabled for this site." %}</p>
             <p>{% trans "All configuration options must be edited in the site settings.py file" %}</p>
@@ -104,8 +131,8 @@
                                     </table>
                                     </fieldset>
                                 {% endif %}
-                                <fieldset class="module collapse">
-                                <h2 id="{{ group.key }}">{{ group.name }}</h2>
+                                <fieldset class="module collapse collapsed">
+                                    <h2 id="{{ group.key }}"><span>{{ group.name }}</span><a onclick="javascript: return toggleCollapse(this)">show/hide</a></h2>
                                 <table summary="{% blocktrans with group.name as name %}Group settings: {{ name }}{% endblocktrans %}"
                                        style="width: 100%">
                             {% endwith %}{% endifchanged %}
@@ -134,7 +161,6 @@
                     {% admin_site_views 'satchmo_site_settings' %}
                     <br class="clear:both;"/>
                     <input type="submit" value="{% trans 'Update Settings' %}"/>
-                    <p><a onclick="javascript:return uncollapse();" href="#">{% trans 'Uncollapse all' %}</a></p>
                     <p><a href="{% url 'settings_export' %}">{% trans 'Export' %}</a></p>
                 </form>
             {% else %}

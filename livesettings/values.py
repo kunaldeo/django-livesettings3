@@ -4,9 +4,10 @@ http://code.google.com/p/django-values/
 """
 from decimal import Decimal
 import os
+from urllib.parse import quote, unquote
 
 from livesettings.forms import LocalizedMultipleChoiceField, LocalizedChoiceField
-from livesettings.widgets import ImageInput
+from livesettings.widgets import ImageInput, StringArrayWidget
 
 try:
     from collections import OrderedDict as SortedDict
@@ -36,8 +37,8 @@ from . import signals
 
 __all__ = ['BASE_GROUP', 'ConfigurationGroup', 'Value', 'BooleanValue', 'DecimalValue', 'DurationValue',
            'FloatValue', 'IntegerValue', 'ModuleValue', 'PercentValue', 'PositiveIntegerValue', 'SortedDotDict',
-           'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue', 'PasswordValue',
-           'URLValue', 'ImageValue']
+           'StringArrayValue', 'StringValue', 'LongStringValue', 'MultipleStringValue', 'LongMultipleStringValue',
+           'PasswordValue', 'URLValue', 'ImageValue']
 
 _WARN = {}
 try:
@@ -286,7 +287,7 @@ class Value(object):
             self.requires_value = group.requires_value
 
         if 'default' in kwargs:
-            self.default = kwargs.pop('default')
+            self.default = kwargs.pop('default', None)
             self.use_default = True
         else:
             self.use_default = False
@@ -310,10 +311,10 @@ class Value(object):
         return iter(self.value)
 
     def __unicode__(self):
-        return str(self.value)
+        return f'{self.value} - {self.key}'
 
     def __str__(self):
-        return str(self.value)
+        return f'{self.value} - {self.key}'
 
     def add_choice(self, choice):
         """Add a choice if it doesn't already exist."""
@@ -391,6 +392,7 @@ class Value(object):
         else:
             if self.hidden:
                 kwargs['widget'] = forms.HiddenInput()
+            kwargs['default'] = getattr(self, 'default', None)
             field = self.field(**kwargs)
 
         field.group = self.group
@@ -559,6 +561,7 @@ class BooleanValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.BooleanField.__init__(self, *args, **kwargs)
 
     def add_choice(self, choice):
@@ -579,6 +582,7 @@ class DecimalValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.DecimalField.__init__(self, *args, **kwargs)
 
         def clean(self, value):
@@ -613,6 +617,7 @@ class DurationValue(Value):
 
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            kwargs.pop('default', None)
             forms.CharField.__init__(self, *args, **kwargs)
 
         def clean(self, value):
@@ -650,6 +655,7 @@ class FloatValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.FloatField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
@@ -670,6 +676,7 @@ class IntegerValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.IntegerField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
@@ -741,6 +748,7 @@ class PositiveIntegerValue(IntegerValue):
             kwargs['required'] = False
             kwargs['min_value'] = 0
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.IntegerField.__init__(self, *args, **kwargs)
 
 
@@ -749,6 +757,7 @@ class StringValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.CharField.__init__(self, *args, **kwargs)
 
     def to_python(self, value):
@@ -776,6 +785,7 @@ class PasswordValue(StringValue):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             kwargs['widget'] = forms.PasswordInput(render_value=self.render_value)
+            kwargs.pop('default', None)
             forms.CharField.__init__(self, *args, **kwargs)
 
     class FieldNoRender(FieldRender):
@@ -806,6 +816,7 @@ class URLValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.URLField.__init__(self, **kwargs)
 
 
@@ -816,6 +827,7 @@ class LongStringValue(Value):
             kwargs['required'] = False
             kwargs['widget'] = forms.Textarea()
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.CharField.__init__(self, *args, **kwargs)
 
     def make_setting(self, db_value, language_code=None):
@@ -831,6 +843,44 @@ class LongStringValue(Value):
         return str(value)
 
     to_editor = to_python
+
+
+class StringArrayValue(LongStringValue):
+    class field(forms.CharField):
+        def __init__(self, *args, **kwargs):
+            kwargs['required'] = False
+            self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            default_value = kwargs.pop('default', [])
+            kwargs['widget'] = StringArrayWidget(default=default_value)
+            forms.CharField.__init__(self, *args, **kwargs)
+
+        def clean(self, value):
+            return json.loads(unquote(value))
+
+    def to_python(self, value):
+        if value == NOTSET:
+            value = []
+
+        if isinstance(value, list):
+            return value
+
+        if isinstance(value, str):
+            return json.loads(value)
+
+        raise TypeError('list value or dumped json expected')
+
+    def to_editor(self, value):
+        if value == NOTSET:
+            return quote(json.dumps([]))
+
+        if isinstance(value, str):
+            return quote(value)
+
+        assert isinstance(value, list)
+        return quote(json.dumps(value))
+
+    def get_db_prep_save(self, value):
+        return json.dumps(value)
 
 
 class ImageValue(StringValue):
@@ -856,6 +906,7 @@ class ImageValue(StringValue):
             self.allowed_file_extensions = kwargs.pop('allowed_file_extensions')
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
             url_resolver = kwargs.pop('url_resolver')
+            kwargs.pop('default', None)
             kwargs['widget'] = ImageInput(url_resolver = url_resolver)
             forms.FileField.__init__(self, *args, **kwargs)
 
@@ -913,6 +964,7 @@ class MultipleStringValue(Value):
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
             self.language_code = kwargs.pop('language_code', djangosettings.LANGUAGE_CODE)
+            kwargs.pop('default', None)
             forms.CharField.__init__(self, *args, **kwargs)
 
     def choice_field(self, **kwargs):
@@ -955,6 +1007,7 @@ class ModuleValue(Value):
 
         def __init__(self, *args, **kwargs):
             kwargs['required'] = False
+            kwargs.pop('default', None)
             forms.CharField.__init__(self, *args, **kwargs)
 
     def load_module(self, module):
@@ -962,8 +1015,7 @@ class ModuleValue(Value):
         value = self._value()
         if value == NOTSET:
             raise SettingNotSet(f"{self.group.key}.{self.key}")
-        else:
-            return load_module("%s.%s" % (value, module))
+        return load_module("%s.%s" % (value, module))
 
     def to_python(self, value):
         if value in (NOTSET, ''):
