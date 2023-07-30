@@ -21,7 +21,6 @@ except ImportError:
 
 from django import forms
 from django.conf import settings as djangosettings
-from django.contrib.postgres.forms import SimpleArrayField
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files import storage
 from django.db import connection, DatabaseError
