@@ -25,6 +25,8 @@ setuptools_hg-*
 *.bak
 .eggs
 env
+node_modules
 test-project/test_project/media/*
 !test-project/test_project/media/README.md
 .vscode/
+the.diff

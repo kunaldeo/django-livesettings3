@@ -1,0 +1,75 @@
+{% extends "admin/base_site.html" %}
+{% load i18n config_tags %}
+{% load static %}
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}"/>
+{% endblock %}
+
+{% block extrahead %}
+    <script src="{% static "livesettings/js/string_array_widget.js" %}"></script>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}dashboard{% endblock %}
+{% block userlinks %}<a href="{% url 'admin:index' %}doc/">{% trans 'Documentation' %}</a> /
+    <a href="{% url 'admin:index' %}password_change/">{% trans 'Change password' %}</a> /
+    <a href="{% url 'admin:index' %}logout/">{% trans 'Log out' %}</a>{% endblock %}
+{% block breadcrumbs %}{% if not is_popup %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans "Home" %}</a> &rsaquo;
+        {% trans "Edit Group Settings" %}
+    </div>
+{% endif %}{% endblock %}
+
+{% block messages %}
+    {% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}</ul>
+    {% endif %}
+{% endblock messages %}
+
+{% block content %}
+    <div id="content-main">
+        {% if form.errors %}
+            <p class="errornote">
+                {% blocktrans count form.errors|length as counter %}Please correct the error below.{% plural %}Please
+                    correct the errors below.{% endblocktrans %}
+            </p>
+        {% endif %}
+        {% if form.fields %}
+            <form method="post" enctype="multipart/form-data"> {% csrf_token %}
+                <div class="module">
+                    <table summary="
+
+                            {% filter capfirst %}{% blocktrans with group.name as name %}Settings included in {{ name }}.{% endblocktrans %}{% endfilter %}"
+                           width="100%">
+                        {% for field in form %}
+                            {% if field.errors %}
+                                <tr class="error">
+                                    <td colspan="2">{{ field.errors }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr{% if field.errors %} class="error"{% endif %}>
+                                <td style="width: 50%;">
+                                    {{ field.label_tag }}
+                                    {% if field.help_text %}
+                                        <p class="help">{{ field.help_text|break_at:40 }}</p>
+                                    {% endif %}
+                                    {% if field.field.default_text %}
+                                        <p class="help">{{ field.field.default_text|break_at:40 }}</p>
+                                    {% endif %}
+                                </td>
+                                <td>{{ field }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <input type="submit" value="Save" class="default"/>
+            </form>
+        {% else %}
+            <p>{% trans "You don't have permission to edit values." %}</p>
+        {% endif %}
+    </div>
+{% endblock %}
