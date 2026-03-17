@@ -25,6 +25,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files import storage
 from django.db import connection, DatabaseError
 from django.utils.encoding import smart_str
+from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext, gettext_lazy as _
 from django.utils.translation import get_language as _get_language
@@ -930,10 +931,16 @@ class ImageValue(StringValue):
         django UploadedFile object
         """
         #0) initialize file storage
-        file_storage_class = storage.get_storage_class()
+        try:
+            file_storage_class = storage.get_storage_class()
+            default_storage_backend = djangosettings.DEFAULT_FILE_STORAGE
+        except AttributeError:
+            # Django 5.1+: get_storage_class() was removed, use STORAGES setting instead
+            default_storage_backend = djangosettings.STORAGES['default']['BACKEND']
+            file_storage_class = import_string(default_storage_backend)
 
         storage_settings = {}
-        if djangosettings.DEFAULT_FILE_STORAGE == \
+        if default_storage_backend == \
             'django.core.files.storage.FileSystemStorage':
             storage_settings = {
                 'location': self.upload_directory,
