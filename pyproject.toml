@@ -42,7 +42,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["coverage"]
+test = ["coverage[toml]"]
 
 [project.urls]
 Homepage = "https://github.com/kunaldeo/django-livesettings3/"

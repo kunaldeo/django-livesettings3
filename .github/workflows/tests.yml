@@ -75,7 +75,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install "Django~=${{ matrix.django-version }}.0" coverage -e .
+        run: pip install "Django~=${{ matrix.django-version }}.0" "coverage[toml]" -e .
 
       - name: Run tests
         run: coverage run test-project/manage.py test livesettings localsite
