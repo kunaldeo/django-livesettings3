@@ -1,6 +1,6 @@
 django-livesettings3
 =====
-[![Tests](https://github.com/ASKBOT/django-livesettings3/actions/workflows/tests.yml/badge.svg)](https://github.com/ASKBOT/django-livesettings3/actions/workflows/tests.yml) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3) [![codecov](https://codecov.io/github/ASKBOT/django-livesettings3/branch/master/graph/badge.svg)](https://codecov.io/github/ASKBOT/django-livesettings3)
+[![Tests](https://github.com/kunaldeo/django-livesettings3/actions/workflows/tests.yml/badge.svg)](https://github.com/kunaldeo/django-livesettings3/actions/workflows/tests.yml) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3) [![codecov](https://codecov.io/github/kunaldeo/django-livesettings3/branch/master/graph/badge.svg)](https://codecov.io/github/kunaldeo/django-livesettings3)
 
 This is a Python 3 Port of django-livesettings that has been tested with Python 3.8-3.13 and Django 3.2-5.2.
 
