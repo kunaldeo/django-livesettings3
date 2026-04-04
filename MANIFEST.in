@@ -1,3 +1,0 @@
-recursive-exclude .git
-recursive-exclude livesettings *.pyc
-recursive-include livesettings *

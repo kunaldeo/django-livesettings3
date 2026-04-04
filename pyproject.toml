@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = false
+
+[project]
+name = "django-livesettings3"
+version = "1.7.0"
+description = "Python 3 port of django-livesettings"
+readme = "README.md"
+license = {text = "New BSD License"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Kunal Deo", email = "kunaldeo@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+]
+dependencies = [
+    "django>=3.2,<6",
+    "django-keyedcache3",
+]
+
+[project.optional-dependencies]
+test = ["coverage[toml]"]
+
+[project.urls]
+Homepage = "https://github.com/kunaldeo/django-livesettings3/"
+
+[tool.setuptools.packages.find]
+include = ["livesettings*"]
+
+[tool.setuptools.package-data]
+livesettings = [
+    "templates/**/*",
+    "static/**/*",
+    "locale/**/*",
+]
+
+[tool.setuptools.exclude-package-data]
+livesettings = ["*.orig"]
+
+[tool.coverage.run]
+source = ["livesettings"]
+
+[tool.coverage.report]
+show_missing = true

@@ -1,14 +1,14 @@
 django-livesettings3
 =====
-[![Build Status](https://travis-ci.org/kunaldeo/django-livesettings3.svg?branch=master)](https://travis-ci.org/kunaldeo/django-livesettings3) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3) [![codecov.io](https://codecov.io/github/kunaldeo/django-livesettings3/coverage.svg?branch=master)](https://codecov.io/github/kunaldeo/django-livesettings3?branch=master)
+[![Tests](https://github.com/kunaldeo/django-livesettings3/actions/workflows/tests.yml/badge.svg)](https://github.com/kunaldeo/django-livesettings3/actions/workflows/tests.yml) [![PyPI version](https://badge.fury.io/py/django-livesettings3.svg)](https://badge.fury.io/py/django-livesettings3) [![codecov](https://codecov.io/github/kunaldeo/django-livesettings3/branch/master/graph/badge.svg)](https://codecov.io/github/kunaldeo/django-livesettings3)
 
-This is a Python 3 Port of django-livesettings that has been tested with Python 3.X and Django up to 4.X.
+This is a Python 3 Port of django-livesettings that has been tested with Python 3.8-3.13 and Django 3.2-5.2.
 
 **django-livesettings3** provides the ability to configure settings via an admin interface, rather than by editing settings.py. In addition, livesettings allows you to set sane defaults so that your site can be perfectly functional without any changes. Livesettings uses caching to make sure this has minimal impact on your site’s performance. Finally, if you wish to lock down your site and disable the settings, you can export your livesettings and store them in your settings.py. This allows you have flexibility in deciding how various users interact with your app.
 
 ## Requirements
-- Python 3.6+
-- Django 1.8+
+- Python 3.8+
+- Django 3.2+
 - [django-keyedcache3](https://github.com/kunaldeo/django-keyedcache3)
 
 ## Install
