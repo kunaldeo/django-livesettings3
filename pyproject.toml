@@ -7,7 +7,7 @@ include-package-data = false
 
 [project]
 name = "django-livesettings3"
-version = "1.6.3"
+version = "1.7.0"
 description = "Python 3 port of django-livesettings"
 readme = "README.md"
 license = {text = "New BSD License"}
@@ -30,11 +30,19 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
 ]
 dependencies = [
-    "django>=1.8,<6",
+    "django>=3.2,<6",
     "django-keyedcache3",
 ]
+
+[project.optional-dependencies]
+test = ["coverage"]
 
 [project.urls]
 Homepage = "https://github.com/kunaldeo/django-livesettings3/"
@@ -51,3 +59,9 @@ livesettings = [
 
 [tool.setuptools.exclude-package-data]
 livesettings = ["*.orig"]
+
+[tool.coverage.run]
+source = ["livesettings"]
+
+[tool.coverage.report]
+show_missing = true

@@ -9,15 +9,8 @@ from urllib.parse import quote, unquote
 from livesettings.forms import LocalizedMultipleChoiceField, LocalizedChoiceField
 from livesettings.widgets import ImageInput, StringArrayWidget
 
-try:
-    from collections import OrderedDict as SortedDict
-except ImportError:
-    from django.utils.datastructures import SortedDict
-
-try:
-    import json
-except ImportError:
-    from django.utils import simplejson as json
+from collections import OrderedDict as SortedDict
+import json
 
 from django import forms
 from django.conf import settings as djangosettings

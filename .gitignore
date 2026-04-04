@@ -31,3 +31,5 @@ test-project/test_project/media/*
 .vscode/
 .venv
 the.diff
+.coverage
+htmlcov/
